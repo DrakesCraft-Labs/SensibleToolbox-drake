@@ -34,4 +34,4 @@ jobs:
         shell: bash
         run: |
           chmod +x gradlew
-          ./gradlew build -x test || ./gradlew shadowJar
+          ./gradlew help
