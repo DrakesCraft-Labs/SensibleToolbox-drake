@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: ["1.21-latin"]
   push:
-    branches: ["1.21-latin", "chore/governance-standardization"]
+    branches: ["1.21-latin"]
 
 jobs:
   build:
