@@ -6,6 +6,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   release-build:
     runs-on: ubuntu-latest
@@ -18,28 +21,46 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: maven
 
-      - name: Build with Maven (standalone-safe)
+      - name: Build with Maven
         if: ${{ hashFiles('pom.xml') != '' }}
-        shell: bash
-        run: |
-          if grep -q '<artifactId>drakes-slimefun-labs</artifactId>' pom.xml; then
-            echo '::notice title=Release fallback::Parent drakes-slimefun-labs detectado; se omite build Maven completo en repos standalone.'
-            exit 0
-          fi
-          mvn -B -ntp -DskipTests clean package
+        run: mvn -B -ntp -DskipTests clean package
 
-      - name: Build with Gradle (standalone-safe)
+      - name: Build with Gradle
         if: ${{ hashFiles('gradlew') != '' && hashFiles('pom.xml') == '' }}
-        shell: bash
         run: |
           chmod +x gradlew
           ./gradlew shadowJar || ./gradlew build -x test
 
-      - name: Upload artifacts
+      - name: Collect release jars
+        id: jars
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t jars < <(find . -type f \( -path '*/target/*.jar' -o -path '*/build/libs/*.jar' \) \
+            | grep -Ev '(sources|javadoc|original|plain)\.jar$' || true)
+          if [ ${#jars[@]} -eq 0 ]; then
+            echo "No JAR artifacts found after build"
+            exit 1
+          fi
+          printf '%s\n' "${jars[@]}" > release-jars.txt
+          echo "jar_count=${#jars[@]}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-artifacts
+          name: release-jars
           path: |
+            release-jars.txt
             **/target/*.jar
             **/build/libs/*.jar
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            **/target/*.jar
+            **/build/libs/*.jar
+          generate_release_notes: true
