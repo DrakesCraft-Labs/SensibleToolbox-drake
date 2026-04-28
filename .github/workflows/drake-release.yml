@@ -1,0 +1,39 @@
+name: Drake Release Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build with Maven (if present)
+        if: ${{ hashFiles('pom.xml') != '' }}
+        run: mvn -B -ntp -DskipTests clean package
+
+      - name: Build with Gradle (if present)
+        if: ${{ hashFiles('gradlew') != '' }}
+        run: |
+          chmod +x gradlew
+          ./gradlew shadowJar || ./gradlew build -x test
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            **/target/*.jar
+            **/build/libs/*.jar

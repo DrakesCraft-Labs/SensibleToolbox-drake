@@ -1,17 +1,17 @@
-## Description
-<!-- Please explain what you changed/added and why you did it in detail. -->
-
-## Changes
-<!-- Please list all the changes you have made. -->
-
-## Related Issues
-<!-- Please tag any Issues related to your Pull Request -->
-<!-- Syntax: "Resolves #000" -->
+## Resumen
+- Describe brevemente qué problema resuelve este PR.
+- Incluye el alcance técnico del cambio.
 
 ## Checklist
-<!-- Here is a little checklist you should follow. -->
-<!-- You can click those check boxes after you posted your issue. -->
-- [ ] I have fully tested the proposed changes and promise that they will not break everything into chaos.
-- [ ] I followed the existing code standards and didn't mess up the formatting.
-- [ ] I did my best to add documentation to any public classes or methods I added.
-- [ ] I have added `Nonnull` and `Nullable` annotations to my methods to indicate their behaviour for null values
+- [ ] Probado localmente (build y arranque)
+- [ ] Sin breaking changes no documentados
+- [ ] README/Docs actualizados si aplica
+- [ ] Compatibilidad validada para `1.21-latin`
+
+## Test plan
+- [ ] `mvn -DskipTests clean package` o `./gradlew build`
+- [ ] Arranque en Paper/Purpur 1.21.x
+- [ ] Revisión de `logs/latest.log` sin errores nuevos
+
+## Riesgos
+- Impacto esperado y plan de rollback.

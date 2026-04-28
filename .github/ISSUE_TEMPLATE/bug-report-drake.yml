@@ -1,0 +1,42 @@
+name: Bug report
+description: Reportar un fallo reproducible del addon
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: input
+    id: mc
+    attributes:
+      label: Versión de Minecraft/Paper
+      placeholder: "Ej: Purpur 1.21.1"
+    validations:
+      required: true
+  - type: input
+    id: addon
+    attributes:
+      label: Versión del addon
+      placeholder: "Ej: 1.21-Drake-SNAPSHOT"
+    validations:
+      required: true
+  - type: textarea
+    id: desc
+    attributes:
+      label: Descripción del problema
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/stacktrace
+      render: text
+    validations:
+      required: true
