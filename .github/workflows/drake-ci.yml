@@ -30,7 +30,7 @@ jobs:
           mvn -B -ntp -DskipTests clean package
 
       - name: Build with Gradle (standalone-safe)
-        if: ${{ hashFiles('gradlew') != '' }}
+        if: ${{ hashFiles('gradlew') != '' && hashFiles('pom.xml') == '' }}
         shell: bash
         run: |
           chmod +x gradlew
