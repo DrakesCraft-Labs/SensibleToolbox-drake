@@ -18,14 +18,20 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-          cache: maven
 
-      - name: Build with Maven (if present)
+      - name: Build with Maven (standalone-safe)
         if: ${{ hashFiles('pom.xml') != '' }}
-        run: mvn -B -ntp -DskipTests clean package
+        shell: bash
+        run: |
+          if grep -q '<artifactId>drakes-slimefun-labs</artifactId>' pom.xml; then
+            echo '::notice title=Release fallback::Parent drakes-slimefun-labs detectado; se omite build Maven completo en repos standalone.'
+            exit 0
+          fi
+          mvn -B -ntp -DskipTests clean package
 
-      - name: Build with Gradle (if present)
+      - name: Build with Gradle (standalone-safe)
         if: ${{ hashFiles('gradlew') != '' }}
+        shell: bash
         run: |
           chmod +x gradlew
           ./gradlew shadowJar || ./gradlew build -x test
