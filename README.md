@@ -1,72 +1,50 @@
 # SensibleToolbox-drake
 
-## Resumen Drake
-Addon de Slimefun con maquinas, herramientas y bloques tecnicos para automatizacion y energia.
+[![Rama](https://img.shields.io/badge/branch-1.21--latin-2ea44f)](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake/tree/1.21-latin)
+[![Licencia](https://img.shields.io/github/license/DrakesCraft-Labs/SensibleToolbox-drake)](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake/blob/1.21-latin/LICENSE)
+[![Ultimo commit](https://img.shields.io/github/last-commit/DrakesCraft-Labs/SensibleToolbox-drake/1.21-latin)](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake/commits/1.21-latin)
 
-## Que anade a Slimefun
-- Extiende contenido de Slimefun con mecanicas y bloques propios del addon.
-- Incluye ajustes de compatibilidad para stack Drake 1.21.
+## Descripción técnica
+Addon técnico de Slimefun orientado a máquinas, automatización de recursos y utilidades de energía.
 
-## Estado
-- Extraido desde drakes-slimefun-labs (rama 1.21-latin).
-- Objetivo: desarrollo aislado por addon y releases independientes.
+## Qué añade a Slimefun
+- Nuevas rutas de automatización con bloques técnicos reutilizables.
+- Opciones de generación/consumo energético para redes Slimefun avanzadas.
+- Herramientas y bloques orientados a infraestructura de base.
 
----
+## Características principales
+- Máquinas de procesamiento y generación con inventarios guiados.
+- Sistema de bloques funcionales y upgrades para progresión tecnológica.
+- Compatibilidad adaptada al stack Drake/Paper 1.21.
 
-# :toolbox: Sensible Toolbox
-Looking for the download link? [**Click here**](#floppy_disk-download-sensible-toolbox)
+## Matriz de compatibilidad
+| Componente | Estado |
+|---|---|
+| Minecraft | 1.21.x |
+| Paper/Purpur | 1.21.x |
+| Slimefun Core Drake | 11.x (línea `1.21-latin`) |
+| Java | 21 |
 
-Sensible Toolbox is a Spigot/Paper plugin which adds a bunch of new items, tools and machines to your Minecraft Server.
-It's heavily inspired by certain Forge-based mods, but of course requires no client modifications at all.
+## Instalación
+1. Descarga el `.jar` de Releases del repositorio.
+2. Copia el archivo en la carpeta `plugins/` del servidor.
+3. Asegura dependencias (`Slimefun`, `ProtocolLib` u otras según addon).
+4. Reinicia el servidor y revisa `logs/latest.log` para validar carga.
 
-Also check out [Slimefun5](https://github.com/Slimefun5/Slimefun5), they pair really well together!
+## Build local
+```bash
+mvn -Dmaven.test.skip=true clean package
+```
 
-## :notebook_with_decorative_cover: About the project
-SensibleToolbox was created in early 2014 and originally developed by [@desht](https://github.com/desht), here is a link to the original GitHub Repository: https://github.com/desht/sensibletoolbox.<br>
-I took over the project back in late 2014 and continued to update it for some time until I have quit plugin development altogether in late 2016.<br>
-In late 2020 STB was finally updated once more but it is currently very unstable, so please report any bugs you can find!
+Artefacto esperado:
+- `target/SensibleToolbox-drake-*.jar`
 
-## :floppy_disk: Download Sensible Toolbox
-Download from [GitHub Releases](https://github.com/Slimefun5/SensibleToolbox/releases).<br>
-STB has no dependencies, so you can just drop it into your `/plugins/` folder and you are good to go!
+## Flujo de release
+1. Crear branch de cambios (`feature/*` o `fix/*`).
+2. Abrir PR hacia `1.21-latin` con plan de pruebas.
+3. Al mergear, crear tag/release y publicar jar compilado.
 
-## :headphones: Discord Support Server
-You can join the official Slimefun Discord Server to chat about Slimefun and some of our other projects, including SensibleToolbox.<br>
-Please head to the `#sensible-toolbox` channel for this.
+Tag semántico por addon (`vX.Y.Z-drake`) + changelog con cambios de compatibilidad API/MC.
 
-**Important**: We do **not** accept bug reports on discord, please use our [Issue Tracker](https://github.com/Slimefun5/SensibleToolbox/issues) to submit bug reports!
-
-<p align="center">
-  <a href="https://discord.gg/slimefun">
-    <img src="https://discordapp.com/api/guilds/565557184348422174/widget.png?style=banner3" alt="Discord Invite"/>
-  </a>
-</p>
-
-## :wave: Contributing to this project
-Sensible Toolbox is an Open-Source project and licensed under
-[GNU GPLv3](https://github.com/Slimefun5/SensibleToolbox/blob/master/LICENSE).<br>
-Please consider helping us maintain this project too, your engagement keeps the project alive <3.
-
-You can find more info on how to contribute to this project in our [CONTRIBUTING.md](https://github.com/Slimefun5/SensibleToolbox/blob/master/CONTRIBUTING.md).
-
-## :bulb: Credits
-This is a fork of [desht/sensibletoolbox](https://github.com/desht/sensibletoolbox).
-
-Sensible Toolbox is primarily original code, but many of its ideas stem from popular Forge mods.
-So credit where credit is due:
-* The BSU/HSU blocks are based on Barrels from Factorization and Jabba, also the Deep Storage Unit from Minefactory Reloaded.
-* The processing machines get their inspiration from multiple Forge-based mods, in particular IC2 and Thermal Expansion.
-* The energy system is primarily inspired by Thermal Expansion.
-* Numerous miscellaneous items are adapted (sometimes blatantly!) from Misc Utilities and OpenBlocks.
-* The item routing system is entirely original (as far as I'm aware), mainly due to the fact that it's difficult to do pipes with vanilla Minecraft blocks :)
-* The ender storage system is inspired by and works similarly (but not identically) to Ender Storage.
-
-### Disclaimer
-SensibleToolbox uses [bStats](https://bstats.org/plugin/bukkit/SensibleToolbox/6354) to collect anonymous information about the usage of this plugin.<br>
-This is solely for statistical purposes, as we are interested in how Servers/Players use this plugin.<br>
-All available data is anonymous and aggregated, at no point can we see individual server or player information.<br>
-All of the collected data is publicly accessible: https://bstats.org/plugin/bukkit/SensibleToolbox/6354
-
-You can also disable this behaviour under `/plugins/bStats/config.yml`.<br>
-For more info see [bStats' Privacy Policy](https://bstats.org/privacy-policy)
-
+## Relación con el monorepo
+Este repositorio se mantiene en paralelo con `drakes-slimefun-labs` para desarrollo aislado por addon y despliegues independientes.
