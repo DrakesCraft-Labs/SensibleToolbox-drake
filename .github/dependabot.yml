@@ -9,6 +9,7 @@ updates:
     groups:
       actions-all:
         patterns: ["*"]
+
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -23,9 +24,11 @@ updates:
         dependency-type: "development"
         update-types: ["patch", "minor"]
     ignore:
+      - dependency-name: "com.github.drakescraft_labs:*"
       - dependency-name: "io.papermc.paper:paper-api"
       - dependency-name: "org.spigotmc:spigot-api"
       - dependency-name: "org.bukkit:bukkit"
+
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
@@ -35,3 +38,8 @@ updates:
     groups:
       gradle-all:
         patterns: ["*"]
+    ignore:
+      - dependency-name: "com.github.drakescraft_labs:*"
+      - dependency-name: "io.papermc.paper:paper-api"
+      - dependency-name: "org.spigotmc:spigot-api"
+      - dependency-name: "org.bukkit:bukkit"
