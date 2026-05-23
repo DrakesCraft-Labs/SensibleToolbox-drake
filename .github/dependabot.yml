@@ -40,6 +40,8 @@ updates:
         patterns: ["*"]
     ignore:
       - dependency-name: "com.github.drakescraft_labs:*"
+      - dependency-name: "net.endkind:*"
+      - dependency-name: "gradle-wrapper"
       - dependency-name: "io.papermc.paper:paper-api"
       - dependency-name: "org.spigotmc:spigot-api"
       - dependency-name: "org.bukkit:bukkit"
