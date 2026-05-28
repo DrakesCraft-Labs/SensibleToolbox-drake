@@ -22,6 +22,7 @@ java {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://repo.papermc.io/repository/maven-public/")
@@ -32,12 +33,12 @@ repositories {
 }
 
 dependencies {
-    "githubCompileOnly"("Slimefun5:Slimefun5:v5.0.3")
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("com.github.drakescraft_labs:slimefun-core:11.0-Drake-1.21.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
     compileOnly("com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.4.9")
-    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.3") {
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.2") {
         exclude(group = "de.schlichtherle", module = "truezip")
     }
 
