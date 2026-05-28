@@ -1,6 +1,8 @@
 package io.github.thebusybiscuit.sensibletoolbox.commands;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -40,7 +42,11 @@ public class SoundCommand extends AbstractCommand {
     @Override
     public List<String> onTabComplete(Plugin plugin, CommandSender sender, String[] args) {
         if (args.length == 1) {
-            return getEnumCompletions(sender, Sound.class, args[0]);
+            String prefix = args[0].toUpperCase(Locale.ROOT);
+            return Arrays.stream(Sound.values())
+                    .map(sound -> sound.getKey().getKey().replace('.', '_').toUpperCase(Locale.ROOT))
+                    .filter(sound -> sound.startsWith(prefix))
+                    .toList();
         } else {
             return noCompletions(sender);
         }

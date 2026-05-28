@@ -22,7 +22,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 import com.comphenix.protocol.ProtocolLib;
 
-import com.github.drakescraft_labs.labupdate.DrakesLabsReleaseUpdate;
 import com.github.drakescraft_labs.slimefun4.libraries.dough.protection.ProtectionManager;
 import io.github.thebusybiscuit.sensibletoolbox.api.AccessControl;
 import io.github.thebusybiscuit.sensibletoolbox.api.FriendManager;
@@ -187,7 +186,6 @@ public class SensibleToolboxPlugin extends JavaPlugin implements ConfigurationLi
     @Override
     public void onEnable() {
         instance = this;
-        DrakesLabsReleaseUpdate.schedule(this, "SensibleToolbox-drake");
 
         // We wanna ensure that the Server uses a compatible version of Minecraft
         if (isVersionUnsupported()) {
