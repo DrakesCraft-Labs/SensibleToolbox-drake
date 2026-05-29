@@ -22,7 +22,18 @@
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
-
+    <repositories>
+        <repository>
+            <id>drakescraft-labs-maven</id>
+            <url>https://drakescraft-labs.github.io/maven-repo/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>com.github.drakescraft_labs</groupId>
