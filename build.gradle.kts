@@ -1,6 +1,6 @@
 plugins {
     java
-    id("com.gradleup.shadow") version "9.4.1"
+    id("com.gradleup.shadow") version "9.4.2"
     id("io.github.intisy.github-gradle") version "1.8.2.2"
 }
 
@@ -38,7 +38,7 @@ dependencies {
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
     compileOnly("com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.4.9")
-    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.2") {
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.3") {
         exclude(group = "de.schlichtherle", module = "truezip")
     }
 
