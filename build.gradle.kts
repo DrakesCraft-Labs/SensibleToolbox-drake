@@ -1,7 +1,7 @@
 plugins {
     java
-    id("com.gradleup.shadow") version "9.4.2"
-    id("io.github.intisy.github-gradle") version "1.8.2.2"
+    id("com.gradleup.shadow") version "9.4.3"
+    id("io.github.intisy.github-gradle") version "1.8.3.1"
 }
 
 group = "com.github.slimefun"
@@ -44,7 +44,7 @@ dependencies {
 
     implementation("org.bstats:bstats-bukkit:3.2.1")
 
-    testImplementation(platform("org.junit:junit-bom:6.1.0"))
+    testImplementation(platform("org.junit:junit-bom:6.1.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
