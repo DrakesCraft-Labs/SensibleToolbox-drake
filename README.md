@@ -1,6 +1,6 @@
 <div align="center">
 
-![SensibleToolbox-Drake Banner](./banner.svg)
+  <img src="https://raw.githubusercontent.com/DrakesCraft-Labs/SensibleToolbox-drake/1.21-latin/banner.svg" alt="SensibleToolbox-drake Banner" width="920" />
 
 # 🧪 SensibleToolbox-Drake
 
