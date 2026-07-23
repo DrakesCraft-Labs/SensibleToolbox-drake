@@ -1,50 +1,40 @@
-# SensibleToolbox-drake
+<div align="center">
 
-[![Rama](https://img.shields.io/badge/branch-1.21--latin-2ea44f)](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake/tree/1.21-latin)
-[![Licencia](https://img.shields.io/github/license/DrakesCraft-Labs/SensibleToolbox-drake)](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake/blob/1.21-latin/LICENSE)
-[![Ultimo commit](https://img.shields.io/github/last-commit/DrakesCraft-Labs/SensibleToolbox-drake/1.21-latin)](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake/commits/1.21-latin)
+![SensibleToolbox-Drake Banner](./banner.svg)
 
-## Descripción técnica
-Addon técnico de Slimefun orientado a máquinas, automatización de recursos y utilidades de energía.
+# 🧪 SensibleToolbox-Drake
 
-## Qué añade a Slimefun
-- Nuevas rutas de automatización con bloques técnicos reutilizables.
-- Opciones de generación/consumo energético para redes Slimefun avanzadas.
-- Herramientas y bloques orientados a infraestructura de base.
+**Addon de Slimefun4 con Aceleración Nativa en Rust (Java 21 Project Panama FFM API)**
 
-## Características principales
-- Máquinas de procesamiento y generación con inventarios guiados.
-- Sistema de bloques funcionales y upgrades para progresión tecnológica.
-- Compatibilidad adaptada al stack Drake/Paper 1.21.
+<p>
+  <a href="https://github.com/DrakesCraft-Labs/SensibleToolbox-drake"><img src="https://img.shields.io/badge/GitHub-SensibleToolbox--Drake-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
+  <img src="https://img.shields.io/badge/Java-21_FFM_Panama-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21 FFM"/>
+  <img src="https://img.shields.io/badge/Rust-FFM_Accelerated-FF4500?style=for-the-badge&logo=rust&logoColor=white" alt="Rust Native"/>
+  <img src="https://img.shields.io/badge/Paper-1.21.11-38BDF8?style=for-the-badge&logo=minecraft&logoColor=white" alt="Paper 1.21.11"/>
+</p>
 
-## Matriz de compatibilidad
-| Componente | Estado |
-|---|---|
-| Minecraft | 1.21.x |
-| Paper/Purpur | 1.21.x |
-| Slimefun Core Drake | 11.x (línea `1.21-latin`) |
-| Java | 21 |
+</div>
 
-## Instalación
-1. Descarga el `.jar` de Releases del repositorio.
-2. Copia el archivo en la carpeta `plugins/` del servidor.
-3. Asegura dependencias (`Slimefun`, `ProtocolLib` u otras según addon).
-4. Reinicia el servidor y revisa `logs/latest.log` para validar carga.
+---
 
-## Build local
+## ⚡ Novedades del Modelo Híbrido Cero-Riesgo
+
+`SensibleToolbox-Drake` integra el componente Panama FFM **`RustNativeBridge`** para delegar la aceleración de tickers de máquinas y cálculos pesados directamente al motor nativo `Slimefun-Rust` (`slimefun_ffi`):
+- 🚀 **Procesamiento de Ticks en Nanosegundos**: Multi-hilo paralelo real en CPU sin pausas de Garbage Collector.
+- 🛡️ **Preservación Total sin Reset (SQLite 0-Reset)**: Mantiene intactos todos los bloques e inventarios existentes en `stored-blocks.db`.
+
+---
+
+## 🛠️ Compilación
+
 ```bash
-mvn -Dmaven.test.skip=true clean package
+mvn clean package
 ```
 
-Artefacto esperado:
-- `target/SensibleToolbox-drake-*.jar`
+---
 
-## Flujo de release
-1. Crear branch de cambios (`feature/*` o `fix/*`).
-2. Abrir PR hacia `1.21-latin` con plan de pruebas.
-3. Al mergear, crear tag/release y publicar jar compilado.
+<div align="center">
 
-Tag semántico por addon (`vX.Y.Z-drake`) + changelog con cambios de compatibilidad API/MC.
+**DrakesCraft Labs** · Mantenido por [**JackStar6677-1**](https://github.com/JackStar6677-1)
 
-## Relación con el monorepo
-Este repositorio se mantiene en paralelo con `drakes-slimefun-labs` para desarrollo aislado por addon y despliegues independientes.
+</div>
