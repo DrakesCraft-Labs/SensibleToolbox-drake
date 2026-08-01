@@ -1,7 +1,7 @@
 plugins {
     java
-    id("com.gradleup.shadow") version "9.4.3"
-    id("io.github.intisy.github-gradle") version "1.8.3.1"
+    id("com.gradleup.shadow") version "9.6.1"
+    id("io.github.intisy.github-gradle") version "1.8.4.1"
 }
 
 group = "com.github.slimefun"
@@ -38,13 +38,13 @@ dependencies {
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
     compileOnly("com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.4.9")
-    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.3") {
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.4") {
         exclude(group = "de.schlichtherle", module = "truezip")
     }
 
     implementation("org.bstats:bstats-bukkit:3.2.1")
 
-    testImplementation(platform("org.junit:junit-bom:6.1.1"))
+    testImplementation(platform("org.junit:junit-bom:6.1.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.23.0")
