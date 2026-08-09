@@ -216,6 +216,13 @@ public class STBInventoryGUI implements InventoryGUI {
     }
 
     public void receiveEvent(InventoryClickEvent event) {
+        // Virtual GUIs must never participate in Bukkit's cross-inventory collect action.
+        // It runs before slot handlers and can desynchronise custom inventory accounting.
+        if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR || event.getClick() == ClickType.DOUBLE_CLICK) {
+            event.setCancelled(true);
+            return;
+        }
+
         boolean shouldCancel = true;
 
         // try/finally here ensures the event always gets cancelled, even if
