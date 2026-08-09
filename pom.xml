@@ -39,6 +39,23 @@
             <groupId>com.github.drakescraft_labs</groupId>
             <artifactId>drakes-labs-autoupdate</artifactId>
         </dependency>
+        <!--
+          El repositorio nacio con un test que usa JUnit y MockBukkit pero sin declararlos, asi
+          que cualquier 'mvn package' moria en testCompile desde el commit inicial. Se declaran
+          aqui para que el proyecto compile de verdad y el blindaje anti-dupe pueda verificarse.
+        -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v1.21</artifactId>
+            <version>4.110.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
