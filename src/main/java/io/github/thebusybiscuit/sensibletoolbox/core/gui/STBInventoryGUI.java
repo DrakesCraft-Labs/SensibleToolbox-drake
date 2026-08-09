@@ -218,7 +218,14 @@ public class STBInventoryGUI implements InventoryGUI {
     public void receiveEvent(InventoryClickEvent event) {
         // Virtual GUIs must never participate in Bukkit's cross-inventory collect action.
         // It runs before slot handlers and can desynchronise custom inventory accounting.
-        if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR || event.getClick() == ClickType.DOUBLE_CLICK) {
+        if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR
+                || event.getClick() == ClickType.DOUBLE_CLICK
+                || event.getClick().isKeyboardClick()
+                || event.getClick() == ClickType.MIDDLE
+                || event.getClick() == ClickType.CREATIVE
+                || event.getAction() == InventoryAction.HOTBAR_SWAP
+                || event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD
+                || event.getAction() == InventoryAction.CLONE_STACK) {
             event.setCancelled(true);
             return;
         }
@@ -268,27 +275,12 @@ public class STBInventoryGUI implements InventoryGUI {
     }
 
     public void receiveEvent(InventoryDragEvent event) {
-        boolean inGUI = false;
-        boolean shouldCancel = true;
-        try {
-            for (int slot : event.getRawSlots()) {
-                if (containsSlot(slot)) {
-                    inGUI = true;
-                }
-            }
-            if (inGUI) {
-                // we only allow drags with a single slot involved, and we fake that as a left-click on the slot
-                if (event.getRawSlots().size() == 1) {
-                    int slot = (event.getRawSlots().toArray(new Integer[1]))[0];
-                    shouldCancel = !listener.onSlotClick(event.getWhoClicked(), slot, ClickType.LEFT, inventory.getItem(slot), event.getOldCursor());
-                }
-            } else {
-                // drag is purely in the player's inventory; allow it
-                shouldCancel = false;
-            }
-        } finally {
-            if (shouldCancel) {
+        for (int slot : event.getRawSlots()) {
+            if (containsSlot(slot)) {
+                // Drag events mutate GUI slots outside the normal accounting path.
+                // Even a one-slot drag can desynchronise custom machine inventories.
                 event.setCancelled(true);
+                return;
             }
         }
     }
