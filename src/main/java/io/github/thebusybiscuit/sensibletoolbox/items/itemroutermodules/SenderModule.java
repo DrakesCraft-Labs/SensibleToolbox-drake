@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -15,6 +16,7 @@ import io.github.thebusybiscuit.sensibletoolbox.api.STBInventoryHolder;
 import io.github.thebusybiscuit.sensibletoolbox.api.SensibleToolbox;
 import io.github.thebusybiscuit.sensibletoolbox.api.items.BaseSTBBlock;
 import io.github.thebusybiscuit.sensibletoolbox.blocks.router.ItemRouter;
+import io.github.thebusybiscuit.sensibletoolbox.utils.VanillaInventoryUtils;
 import me.desht.dhutils.Debugger;
 
 public class SenderModule extends DirectionalItemRouterModule {
@@ -58,15 +60,37 @@ public class SenderModule extends DirectionalItemRouterModule {
             if (getFilter() != null && !getFilter().shouldPass(getItemRouter().getBufferItem())) {
                 return false;
             }
+            if (getFacing() == null || getFacing() == BlockFace.SELF) {
+                return false;
+            }
             Debugger.getInstance().debug(2, "sender in " + getItemRouter() + " has: " + getItemRouter().getBufferItem());
             Block b = loc.getBlock();
             Block target = b.getRelative(getFacing());
             int nToInsert = getItemRouter().getStackSize();
 
-            if (!(SensibleToolbox.getBlockAt(target.getLocation(), true) instanceof STBInventoryHolder) && allowsItemsThrough(target.getType())) {
-                // search for a visible Item Router with an installed Receiver Module
+            BaseSTBBlock stb = SensibleToolbox.getBlockAt(target.getLocation(), true);
+            if (stb instanceof ItemRouter targetRouter) {
+                ReceiverModule receiver = targetRouter.getReceiver();
+                if (receiver != null) {
+                    ItemStack toSend = getItemRouter().getBufferItem().clone();
+                    toSend.setAmount(Math.min(nToInsert, toSend.getAmount()));
+                    int nReceived = receiver.receiveItem(toSend, getItemRouter().getOwner());
+                    getItemRouter().reduceBuffer(nReceived);
+                    if (nReceived > 0 && SensibleToolbox.getPluginInstance().getConfigCache().getParticleLevel() >= 2) {
+                        playSenderParticles(getItemRouter(), targetRouter);
+                    }
+                    return nReceived > 0;
+                }
+            } else if (stb instanceof STBInventoryHolder holder) {
+                ItemStack toInsert = getItemRouter().getBufferItem().clone();
+                toInsert.setAmount(Math.min(nToInsert, toInsert.getAmount()));
+                int nInserted = holder.insertItems(toInsert, getFacing().getOppositeFace(), false, getItemRouter().getOwner());
+                getItemRouter().reduceBuffer(nInserted);
+                return nInserted > 0;
+            } else if (VanillaInventoryUtils.isVanillaInventory(target)) {
+                return vanillaInsertion(target, nToInsert, getFacing().getOppositeFace());
+            } else if (allowsItemsThrough(target.getType())) {
                 ReceiverModule receiver = findReceiver(b);
-
                 if (receiver != null) {
                     Debugger.getInstance().debug(2, "sender found receiver module in " + receiver.getItemRouter());
                     ItemStack toSend = getItemRouter().getBufferItem().clone();
@@ -76,23 +100,9 @@ public class SenderModule extends DirectionalItemRouterModule {
 
                     if (nReceived > 0 && SensibleToolbox.getPluginInstance().getConfigCache().getParticleLevel() >= 2) {
                         playSenderParticles(getItemRouter(), receiver.getItemRouter());
-
                     }
 
                     return nReceived > 0;
-                }
-            } else {
-                BaseSTBBlock stb = SensibleToolbox.getBlockAt(target.getLocation(), true);
-
-                if (stb instanceof STBInventoryHolder) {
-                    ItemStack toInsert = getItemRouter().getBufferItem().clone();
-                    toInsert.setAmount(Math.min(nToInsert, toInsert.getAmount()));
-                    int nInserted = ((STBInventoryHolder) stb).insertItems(toInsert, getFacing().getOppositeFace(), false, getItemRouter().getOwner());
-                    getItemRouter().reduceBuffer(nInserted);
-                    return nInserted > 0;
-                } else {
-                    // vanilla inventory holder?
-                    return vanillaInsertion(target, nToInsert, getFacing().getOppositeFace());
                 }
             }
         }
@@ -100,12 +110,15 @@ public class SenderModule extends DirectionalItemRouterModule {
     }
 
     private void playSenderParticles(ItemRouter src, ItemRouter dest) {
-        Location s = src.getLocation();
-        Location d = dest.getLocation();
-        double xOff = (d.getX() - s.getX()) / 2;
-        double zOff = (d.getZ() - s.getZ()) / 2;
-        Location mid = s.add(xOff + 0.5, 0.5, zOff + 0.5);
-        s.getWorld().spawnParticle(Particle.DUST, mid.getX(), mid.getY(), mid.getZ(), 15, (float) xOff / 4, 0, (float) zOff / 4, 0, new DustOptions(Color.GREEN, 1.5F));
+        Location s = src.getLocation().clone();
+        Location d = dest.getLocation().clone();
+        double xOff = (d.getX() - s.getX()) / 2.0;
+        double yOff = (d.getY() - s.getY()) / 2.0;
+        double zOff = (d.getZ() - s.getZ()) / 2.0;
+        Location mid = s.add(xOff + 0.5, yOff + 0.5, zOff + 0.5);
+        if (mid.getWorld() != null) {
+            mid.getWorld().spawnParticle(Particle.DUST, mid.getX(), mid.getY(), mid.getZ(), 15, Math.abs((float) xOff / 4.0f), Math.abs((float) yOff / 4.0f), Math.abs((float) zOff / 4.0f), 0, new DustOptions(Color.GREEN, 1.5F));
+        }
     }
 
     private ReceiverModule findReceiver(Block b) {

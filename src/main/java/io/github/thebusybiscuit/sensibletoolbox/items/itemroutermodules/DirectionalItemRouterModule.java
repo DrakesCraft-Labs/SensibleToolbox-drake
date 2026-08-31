@@ -155,15 +155,20 @@ public abstract class DirectionalItemRouterModule extends ItemRouterModule imple
 
     @Override
     public void onInteractItem(PlayerInteractEvent event) {
+        org.bukkit.inventory.EquipmentSlot hand = event.getHand();
+        if (hand == null) hand = org.bukkit.inventory.EquipmentSlot.HAND;
+        ItemStack held = event.getPlayer().getInventory().getItem(hand);
+        int amount = held == null ? 1 : held.getAmount();
+
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
             // set module direction based on clicked block face
             setFacingDirection(event.getBlockFace().getOppositeFace());
-            event.getPlayer().getInventory().setItem(event.getHand(), toItemStack(event.getItem().getAmount()));
+            event.getPlayer().getInventory().setItem(hand, toItemStack(amount));
             event.setCancelled(true);
         } else if (event.getAction() == Action.LEFT_CLICK_AIR && event.getPlayer().isSneaking()) {
             // unset module direction
             setFacingDirection(BlockFace.SELF);
-            event.getPlayer().getInventory().setItem(event.getHand(), toItemStack(event.getItem().getAmount()));
+            event.getPlayer().getInventory().setItem(hand, toItemStack(amount));
             event.setCancelled(true);
         } else if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             ItemRouter rtr = event.getClickedBlock() == null ? null : SensibleToolbox.getBlockAt(event.getClickedBlock().getLocation(), ItemRouter.class, true);
@@ -270,7 +275,15 @@ public abstract class DirectionalItemRouterModule extends ItemRouterModule imple
             }
         }
 
-        player.setItemInHand(toItemStack(player.getItemInHand().getAmount()));
+        if (player instanceof Player p) {
+            ItemStack main = p.getInventory().getItemInMainHand();
+            ItemStack off = p.getInventory().getItemInOffHand();
+            if (SensibleToolbox.getItemRegistry().isSTBItem(main, this.getClass())) {
+                p.getInventory().setItemInMainHand(toItemStack(main.getAmount()));
+            } else if (SensibleToolbox.getItemRegistry().isSTBItem(off, this.getClass())) {
+                p.getInventory().setItemInOffHand(toItemStack(off.getAmount()));
+            }
+        }
     }
 
     protected boolean doPull(BlockFace from, Location loc) {
