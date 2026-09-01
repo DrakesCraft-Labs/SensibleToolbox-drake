@@ -30,6 +30,7 @@ permissions:
          stb.commands.debug: true
          stb.commands.getcfg: true
          stb.commands.rename.free: true
+         stb.commands.rmframe: true
          stb.commands.save: true
          stb.commands.show: true
          stb.commands.setcfg: true
@@ -73,6 +74,12 @@ permissions:
       default: true
    stb.commands.rename.free:
       description: Allow animal renaming for no experience cost with /stb rename
+      default: op
+   stb.commands.rmframe:
+      description: Allow an orphaned End Portal Frame to be cleared with /stb rmframe
+      default: op
+   stb.place.endportalframe:
+      description: Allow End Portal Frame blocks to be placed by hand
       default: op
    stb.commands.save:
       description: Allow the plugin data to be force-saved with /stb save

@@ -54,11 +54,13 @@ import io.github.thebusybiscuit.sensibletoolbox.core.gui.STBInventoryGUI;
 import io.github.thebusybiscuit.sensibletoolbox.core.storage.LocationManager;
 import io.github.thebusybiscuit.sensibletoolbox.utils.STBUtil;
 import me.desht.dhutils.Debugger;
+import me.desht.dhutils.MiscUtil;
 import me.desht.dhutils.text.LogUtils;
 
 public class GeneralListener extends STBBaseListener {
 
     private static final String LAST_PISTON_EXTEND = "STB_Last_Piston_Extend";
+    private static final String FRAME_PLACE_PERMISSION = "stb.place.endportalframe";
 
     public GeneralListener(SensibleToolboxPlugin plugin) {
         super(plugin);
@@ -139,6 +141,12 @@ public class GeneralListener extends STBBaseListener {
             } else if (!((BaseSTBBlock) stb).validatePlaceable(event.getBlock().getLocation())) {
                 event.setCancelled(true);
             }
+        } else if (event.getBlock().getType() == Material.END_PORTAL_FRAME && !event.getPlayer().hasPermission(FRAME_PLACE_PERMISSION)) {
+            // The Ender Bag is an END_PORTAL_FRAME item, and that block is unbreakable in
+            // survival. If its persistent data ever gets stripped (it stops being recognised
+            // as an STB item above), placing it would leave a block nobody can remove again.
+            event.setCancelled(true);
+            MiscUtil.errorMessage(event.getPlayer(), "That block can't be placed here.");
         }
     }
 
