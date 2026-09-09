@@ -73,6 +73,11 @@ Todo el contenido se investiga y fabrica directamente desde la **Guía de Slimef
 * **Ejector Upgrade**: Expulsa automáticamente los productos resultantes hacia inventarios adyacentes.
 * **Thoroughness Upgrade**: Maximiza el rendimiento y eficiencia por operación.
 
+### 🤝 7. Red de amistades
+* **`/stb friend <jugador>`**: Añade un perfil registrado a tu red de confianza.
+* **`/stb unfriend <jugador>`**: Retira un perfil registrado de tu red de confianza.
+* Los nombres inexistentes o UUID no registrados se rechazan con un mensaje claro, sin crear perfiles artificiales ni generar excepciones en consola.
+
 ---
 
 ## 📋 Compatibilidad Técnica
@@ -91,6 +96,10 @@ Todo el contenido se investiga y fabrica directamente desde la **Guía de Slimef
 1. Descarga la última versión de `SensibleToolbox-drake.jar` desde la pestaña [Versions](https://modrinth.com/mod/sensibletoolbox-drake/versions).
 2. Coloca el archivo `.jar` en la carpeta `plugins/` de tu servidor Minecraft junto a `Slimefun4-Drake.jar`.
 3. Inicia o reinicia el servidor. Las recetas y categorías aparecerán automáticamente en `/sf guide`.
+
+## ✅ Verificación
+
+El reactor Maven ejecuta las pruebas JUnit 5 con `mvn clean test`. La suite cubre la carga base y la resolución segura de perfiles usada por los comandos de amistad.
 
 ---
 

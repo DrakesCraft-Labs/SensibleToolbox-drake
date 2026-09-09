@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import me.desht.dhutils.DHUtilsException;
@@ -29,11 +30,30 @@ public abstract class STBAbstractCommand extends AbstractCommand {
     @Nullable
     protected UUID getID(String s) {
         if (MiscUtil.looksLikeUUID(s)) {
-            return UUID.fromString(s);
-        } else {
-            Player p = Bukkit.getPlayer(s);
-            return p == null ? null : p.getUniqueId();
+            UUID requestedId = UUID.fromString(s);
+            Player onlinePlayer = Bukkit.getPlayer(requestedId);
+            if (onlinePlayer != null) {
+                return onlinePlayer.getUniqueId();
+            }
+
+            for (OfflinePlayer knownPlayer : Bukkit.getOfflinePlayers()) {
+                if (requestedId.equals(knownPlayer.getUniqueId())) {
+                    return requestedId;
+                }
+            }
+            return null;
         }
+
+        OfflinePlayer knownPlayer = Bukkit.getOfflinePlayerIfCached(s);
+        return knownPlayer == null ? null : knownPlayer.getUniqueId();
+    }
+
+    protected UUID requireKnownPlayerID(String playerNameOrID) {
+        UUID id = getID(playerNameOrID);
+        if (id == null) {
+            throw new DHUtilsException("Unknown player: " + playerNameOrID);
+        }
+        return id;
     }
 
     protected Player getTargetPlayer(CommandSender sender, @Nullable String playerNameOrID) {
@@ -50,4 +70,3 @@ public abstract class STBAbstractCommand extends AbstractCommand {
         }
     }
 }
-
