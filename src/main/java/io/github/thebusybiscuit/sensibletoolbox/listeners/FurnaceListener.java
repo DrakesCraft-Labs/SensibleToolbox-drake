@@ -103,7 +103,14 @@ public class FurnaceListener extends STBBaseListener {
         BaseSTBItem item = SensibleToolbox.getItemRegistry().fromItemStack(event.getSource());
 
         if (item != null) {
-            event.setResult(item.getSmeltingResult());
+            ItemStack result = item.getSmeltingResult();
+            if (result != null) {
+                if (event.getResult() != null && event.getResult().getAmount() > 1) {
+                    result = result.clone();
+                    result.setAmount(event.getResult().getAmount());
+                }
+                event.setResult(result);
+            }
         }
     }
 

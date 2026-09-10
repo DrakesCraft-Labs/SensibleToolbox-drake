@@ -19,6 +19,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.RecipeChoice;
 
 import io.github.thebusybiscuit.sensibletoolbox.SensibleToolboxPlugin;
 import io.github.thebusybiscuit.sensibletoolbox.api.SensibleToolbox;
@@ -72,7 +73,8 @@ public final class RecipeUtil {
 
         if (stack != null) {
             NamespacedKey key = new NamespacedKey(SensibleToolboxPlugin.getInstance(), item.getItemTypeID() + "_furnacerecipe");
-            Bukkit.addRecipe(new FurnaceRecipe(key, stack, item.getMaterial(), 0, 200));
+            RecipeChoice.ExactChoice choice = new RecipeChoice.ExactChoice(item.toItemStack());
+            Bukkit.addRecipe(new FurnaceRecipe(key, stack, choice, 0, 200));
             recordReverseSmelt(stack, item.toItemStack());
         }
     }
