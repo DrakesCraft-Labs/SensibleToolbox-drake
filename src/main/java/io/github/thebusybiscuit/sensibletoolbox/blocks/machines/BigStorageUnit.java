@@ -46,7 +46,7 @@ public class BigStorageUnit extends AbstractProcessingMachine {
     private int storageAmount;
     private int outputAmount;
     private int maxCapacity;
-    private final String[] signLabel = new String[4];
+    private final String[] signLabel = new String[] { "", "", "", "" };
     private int oldTotalAmount = -1;
     private boolean locked;
 
@@ -512,7 +512,11 @@ public class BigStorageUnit extends AbstractProcessingMachine {
     @Override
     protected String[] getSignLabel(BlockFace face) {
         String[] label = super.getSignLabel(face);
-        System.arraycopy(signLabel, 1, label, 1, 3);
+        for (int i = 1; i < 4; i++) {
+            if (signLabel[i] != null) {
+                label[i] = signLabel[i];
+            }
+        }
         return label;
     }
 

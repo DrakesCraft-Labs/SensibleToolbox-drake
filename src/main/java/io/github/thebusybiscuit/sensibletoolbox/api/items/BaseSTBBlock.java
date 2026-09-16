@@ -921,7 +921,7 @@ public abstract class BaseSTBBlock extends BaseSTBItem {
         String[] res = new String[4];
 
         for (int i = 0; i < 4; i++) {
-            res[i] = i < lines.length ? lines[i] : "";
+            res[i] = (i < lines.length && lines[i] != null) ? lines[i] : "";
         }
 
         return res;
@@ -951,8 +951,8 @@ public abstract class BaseSTBBlock extends BaseSTBItem {
             if (Tag.WALL_SIGNS.isTagged(b1.getType())) {
                 Sign sign = (Sign) b1.getState();
 
-                for (int i = 0; i < text.length; i++) {
-                    sign.setLine(i, text[i]);
+                for (int i = 0; i < 4; i++) {
+                    sign.setLine(i, (text != null && i < text.length && text[i] != null) ? text[i] : "");
                 }
 
                 sign.update();
@@ -1071,8 +1071,8 @@ public abstract class BaseSTBBlock extends BaseSTBItem {
 
             String[] text = getSignLabel(face);
 
-            for (int i = 0; i < text.length; i++) {
-                sign.setLine(i, text[i]);
+            for (int i = 0; i < 4; i++) {
+                sign.setLine(i, (text != null && i < text.length && text[i] != null) ? text[i] : "");
             }
 
             sign.update(false, false);

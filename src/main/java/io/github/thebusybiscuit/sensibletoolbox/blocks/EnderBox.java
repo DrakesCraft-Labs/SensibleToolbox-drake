@@ -29,7 +29,7 @@ public class EnderBox extends BaseSTBBlock implements EnderTunable, STBInventory
 
     private int frequency;
     private boolean global;
-    private final String[] signLabel = new String[4];
+    private final String[] signLabel = new String[] { "", "", "", "" };
 
     public EnderBox() {
         setEnderFrequency(1);
@@ -99,7 +99,11 @@ public class EnderBox extends BaseSTBBlock implements EnderTunable, STBInventory
     @Override
     protected String[] getSignLabel(BlockFace face) {
         String[] label = super.getSignLabel(face);
-        System.arraycopy(signLabel, 1, label, 1, 3);
+        for (int i = 1; i < 4; i++) {
+            if (signLabel[i] != null) {
+                label[i] = signLabel[i];
+            }
+        }
         return label;
     }
 
