@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.sensibletoolbox.api.items;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -59,17 +60,17 @@ public abstract class BaseSTBItem implements Comparable<BaseSTBItem>, InventoryG
 
     protected BaseSTBItem() {
         typeID = getClass().getSimpleName().toLowerCase(Locale.ROOT);
-        providerPlugin = SensibleToolboxPlugin.getInstance().getItemRegistry().getPlugin(this);
+        providerPlugin = SensibleToolboxPlugin.getInstance() != null && SensibleToolboxPlugin.getInstance().getItemRegistry() != null ? SensibleToolboxPlugin.getInstance().getItemRegistry().getPlugin(this) : null;
     }
 
     protected BaseSTBItem(ConfigurationSection conf) {
         typeID = getClass().getSimpleName().toLowerCase(Locale.ROOT);
-        providerPlugin = SensibleToolboxPlugin.getInstance().getItemRegistry().getPlugin(this);
+        providerPlugin = SensibleToolboxPlugin.getInstance() != null && SensibleToolboxPlugin.getInstance().getItemRegistry() != null ? SensibleToolboxPlugin.getInstance().getItemRegistry().getPlugin(this) : null;
     }
 
     @Override
     public NamespacedKey getKey() {
-        return new NamespacedKey(SensibleToolboxPlugin.getInstance(), typeID);
+        return SensibleToolboxPlugin.getInstance() != null ? new NamespacedKey(SensibleToolboxPlugin.getInstance(), typeID) : NamespacedKey.fromString("sensibletoolbox:" + typeID);
     }
 
     /**
@@ -334,7 +335,22 @@ public abstract class BaseSTBItem implements Comparable<BaseSTBItem>, InventoryG
             conf.set("*nostack", System.nanoTime() ^ ThreadLocalRandom.current().nextLong());
         }
         conf.set("*TYPE", getItemTypeID());
-        PersistentDataAPI.setString(im, SensibleToolboxPlugin.getInstance().getItemRegistry().getKey(), conf.saveToString());
+        String serialized = conf.saveToString();
+        byte[] utfBytes = serialized.getBytes(StandardCharsets.UTF_8);
+        if (utfBytes.length > 50000) {
+            if (SensibleToolboxPlugin.getInstance() != null) {
+                SensibleToolboxPlugin.getInstance().getLogger().severe(
+                    "STB item " + getItemTypeID() + " serialized state exceeds safe NBT packet limits (" + utfBytes.length + " bytes > 50000). Pruning state to prevent network packet encoder crash."
+                );
+            }
+            YamlConfiguration safeConf = new YamlConfiguration();
+            safeConf.set("*TYPE", getItemTypeID());
+            if (conf.contains("*nostack")) {
+                safeConf.set("*nostack", conf.get("*nostack"));
+            }
+            serialized = safeConf.saveToString();
+        }
+        PersistentDataAPI.setString(im, SensibleToolboxPlugin.getInstance().getItemRegistry().getKey(), serialized);
 
         res.setItemMeta(im);
 

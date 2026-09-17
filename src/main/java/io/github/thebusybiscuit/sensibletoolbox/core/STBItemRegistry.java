@@ -2,7 +2,9 @@ package io.github.thebusybiscuit.sensibletoolbox.core;
 
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +26,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
@@ -45,6 +48,7 @@ public class STBItemRegistry implements ItemRegistry, Keyed {
     private final Map<String, Class<? extends BaseSTBItem>> craftingRestrictions = new HashMap<>();
     private final Map<String, String> permissionPrefix = new HashMap<>();
     private final Map<String, Plugin> id2plugin = new HashMap<>();
+    private final Plugin plugin;
     private final NamespacedKey namespacedKey;
 
     @ParametersAreNonnullByDefault
@@ -52,6 +56,7 @@ public class STBItemRegistry implements ItemRegistry, Keyed {
         Validate.notNull(plugin, "The Plugin cannot be null");
         Validate.notNull(registryKey, "The registry cannot be null");
 
+        this.plugin = plugin;
         this.namespacedKey = new NamespacedKey(plugin, registryKey);
     }
 
@@ -128,11 +133,55 @@ public class STBItemRegistry implements ItemRegistry, Keyed {
         return reflectionDetailsMap.keySet();
     }
 
+    public void sanitizeOversizedPDC(@Nullable ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) {
+            return;
+        }
+        ItemMeta meta = stack.getItemMeta();
+        if (PersistentDataAPI.hasString(meta, namespacedKey)) {
+            String str = PersistentDataAPI.getString(meta, namespacedKey);
+            if (str != null && str.getBytes(StandardCharsets.UTF_8).length > 50000) {
+                try {
+                    YamlConfiguration conf = YamlConfiguration.loadConfiguration(new StringReader(str));
+                    YamlConfiguration clean = new YamlConfiguration();
+                    String typeId = conf.getString("*TYPE");
+                    if (typeId != null) {
+                        clean.set("*TYPE", typeId);
+                    }
+                    if (conf.contains("*nostack")) {
+                        clean.set("*nostack", conf.get("*nostack"));
+                    }
+                    if (conf.contains("direction")) {
+                        clean.set("direction", conf.getString("direction"));
+                    }
+                    if (conf.contains("terminator")) {
+                        clean.set("terminator", conf.getBoolean("terminator"));
+                    }
+                    clean.set("filterType", "MATERIAL");
+                    clean.set("filtered", Collections.emptyList());
+                    clean.set("filterWhitelist", false);
+                    PersistentDataAPI.setString(meta, namespacedKey, clean.saveToString());
+                    stack.setItemMeta(meta);
+                    if (plugin != null) {
+                        plugin.getLogger().warning(
+                            "Sanitized oversized SensibleToolbox PDC (" + str.length() + " chars) on item " + stack.getType()
+                        );
+                    }
+                } catch (Exception e) {
+                    PersistentDataAPI.remove(meta, namespacedKey);
+                    stack.setItemMeta(meta);
+                }
+            }
+        }
+    }
+
     @Override
     public BaseSTBItem fromItemStack(@Nullable ItemStack stack) {
         if (stack == null) {
             return null;
         }
+
+        sanitizeOversizedPDC(stack);
 
         Configuration conf = getItemAttributes(stack);
         BaseSTBItem item = getItemById(conf.getString("*TYPE"), conf);

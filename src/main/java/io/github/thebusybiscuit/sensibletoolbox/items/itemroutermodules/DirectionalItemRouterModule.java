@@ -1,13 +1,18 @@
 package io.github.thebusybiscuit.sensibletoolbox.items.itemroutermodules;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.HumanEntity;
@@ -17,9 +22,14 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.BundleMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Directional;
 
+import com.github.drakescraft_labs.slimefun4.libraries.dough.data.persistent.PersistentDataAPI;
 import com.github.drakescraft_labs.slimefun4.libraries.dough.items.ItemUtils;
+import io.github.thebusybiscuit.sensibletoolbox.SensibleToolboxPlugin;
 import io.github.thebusybiscuit.sensibletoolbox.api.STBInventoryHolder;
 import io.github.thebusybiscuit.sensibletoolbox.api.SensibleToolbox;
 import io.github.thebusybiscuit.sensibletoolbox.api.filters.Filter;
@@ -70,18 +80,88 @@ public abstract class DirectionalItemRouterModule extends ItemRouterModule imple
 
     public DirectionalItemRouterModule(ConfigurationSection conf) {
         super(conf);
-        setFacingDirection(BlockFace.valueOf(conf.getString("direction")));
+        String dirStr = conf.getString("direction");
+        try {
+            setFacingDirection(dirStr != null ? BlockFace.valueOf(dirStr) : BlockFace.SELF);
+        } catch (IllegalArgumentException e) {
+            setFacingDirection(BlockFace.SELF);
+        }
         setTerminator(conf.getBoolean("terminator", false));
 
         if (conf.contains("filtered")) {
             boolean isWhite = conf.getBoolean("filterWhitelist", true);
-            FilterType filterType = FilterType.valueOf(conf.getString("filterType", "MATERIAL"));
+            FilterType filterType;
+            try {
+                filterType = FilterType.valueOf(conf.getString("filterType", "MATERIAL"));
+            } catch (IllegalArgumentException e) {
+                filterType = FilterType.MATERIAL;
+            }
             @SuppressWarnings("unchecked")
             List<ItemStack> l = (List<ItemStack>) conf.getList("filtered");
-            filter = Filter.fromItemList(isWhite, l, filterType);
+            List<ItemStack> sanitized = new ArrayList<>();
+            if (l != null) {
+                for (ItemStack s : l) {
+                    if (s != null && !s.getType().isAir()) {
+                        ItemStack item = sanitizeFilterItem(s, filterType);
+                        if (item != null) {
+                            sanitized.add(item);
+                        }
+                    }
+                }
+            }
+            filter = Filter.fromItemList(isWhite, sanitized, filterType);
         } else {
             filter = new Filter();
         }
+    }
+
+    public static ItemStack sanitizeFilterItem(ItemStack original, FilterType filterType) {
+        if (original == null || original.getType().isAir()) {
+            return null;
+        }
+        if (filterType == FilterType.MATERIAL) {
+            return new ItemStack(original.getType());
+        }
+        ItemStack clean = original.clone();
+        clean.setAmount(1);
+        ItemMeta meta = clean.getItemMeta();
+        if (meta != null) {
+            boolean modified = false;
+            if (meta instanceof BlockStateMeta bsm && bsm.hasBlockState()) {
+                if (bsm.getBlockState() instanceof Container c) {
+                    c.getInventory().clear();
+                    bsm.setBlockState(c);
+                    modified = true;
+                }
+            }
+            if (meta instanceof BundleMeta bm) {
+                if (!bm.getItems().isEmpty()) {
+                    bm.setItems(Collections.emptyList());
+                    modified = true;
+                }
+            }
+            try {
+                NamespacedKey stbKey = SensibleToolboxPlugin.getInstance().getItemRegistry().getKey();
+                if (PersistentDataAPI.hasString(meta, stbKey)) {
+                    String existing = PersistentDataAPI.getString(meta, stbKey);
+                    if (existing != null && existing.length() > 200) {
+                        YamlConfiguration itemConf = YamlConfiguration.loadConfiguration(new java.io.StringReader(existing));
+                        String typeId = itemConf.getString("*TYPE");
+                        YamlConfiguration minimalConf = new YamlConfiguration();
+                        if (typeId != null) {
+                            minimalConf.set("*TYPE", typeId);
+                        }
+                        PersistentDataAPI.setString(meta, stbKey, minimalConf.saveToString());
+                        modified = true;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+            if (modified) {
+                clean.setItemMeta(meta);
+            }
+        }
+        return clean;
     }
 
     @Override
@@ -91,9 +171,31 @@ public abstract class DirectionalItemRouterModule extends ItemRouterModule imple
         conf.set("terminator", isTerminator());
 
         if (filter != null) {
-            conf.set("filtered", filter.getFilterList());
+            List<ItemStack> sanitizedList = new ArrayList<>();
+            for (ItemStack stack : filter.getFilterList()) {
+                ItemStack sanitized = sanitizeFilterItem(stack, filter.getFilterType());
+                if (sanitized != null) {
+                    sanitizedList.add(sanitized);
+                }
+            }
+            conf.set("filtered", sanitizedList);
             conf.set("filterWhitelist", filter.isWhiteList());
             conf.set("filterType", filter.getFilterType().toString());
+
+            String saved = conf.saveToString();
+            if (saved.getBytes(StandardCharsets.UTF_8).length > 32000) {
+                List<ItemStack> materialOnly = new ArrayList<>();
+                for (ItemStack stack : sanitizedList) {
+                    materialOnly.add(new ItemStack(stack.getType()));
+                }
+                conf.set("filtered", materialOnly);
+                conf.set("filterType", FilterType.MATERIAL.toString());
+                if (SensibleToolboxPlugin.getInstance() != null) {
+                    SensibleToolboxPlugin.getInstance().getLogger().warning(
+                        "DirectionalItemRouterModule filter serialized size exceeded 32KB; degraded to MATERIAL only to prevent packet crash."
+                    );
+                }
+            }
         }
         return conf;
     }
@@ -236,9 +338,9 @@ public abstract class DirectionalItemRouterModule extends ItemRouterModule imple
         if (onCursor.getType() == Material.AIR) {
             gui.getInventory().setItem(slot, null);
         } else {
-            ItemStack stack = onCursor.clone();
-            stack.setAmount(1);
-            gui.getInventory().setItem(slot, stack);
+            FilterType ft = getFilter() != null ? getFilter().getFilterType() : FilterType.MATERIAL;
+            ItemStack sanitized = sanitizeFilterItem(onCursor, ft);
+            gui.getInventory().setItem(slot, sanitized);
         }
         return false;
     }
@@ -271,7 +373,10 @@ public abstract class DirectionalItemRouterModule extends ItemRouterModule imple
             ItemStack stack = gui.getInventory().getItem(slot);
 
             if (stack != null) {
-                filter.addItem(stack);
+                ItemStack sanitized = sanitizeFilterItem(stack, filter.getFilterType());
+                if (sanitized != null) {
+                    filter.addItem(sanitized);
+                }
             }
         }
 
