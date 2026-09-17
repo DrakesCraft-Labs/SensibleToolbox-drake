@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
@@ -18,16 +19,15 @@ public class InfernalFarm extends AutoFarm {
 
     private static final int RADIUS = 5;
 
-    private Set<Block> blocks;
+    private final Set<Block> blocks = new HashSet<>();
     private Material buffer;
 
     public InfernalFarm() {
-        blocks = new HashSet<>();
+        super();
     }
 
     public InfernalFarm(ConfigurationSection conf) {
         super(conf);
-        blocks = new HashSet<>();
     }
 
     @Override
@@ -61,8 +61,35 @@ public class InfernalFarm extends AutoFarm {
         return res;
     }
 
+    private void populateBlocks(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return;
+        }
+        int range = RADIUS / 2;
+        int bx = location.getBlockX();
+        int by = location.getBlockY();
+        int bz = location.getBlockZ();
+        for (int y = 0; y <= 2; y++) {
+            for (int x = -range; x <= range; x++) {
+                for (int z = -range; z <= range; z++) {
+                    blocks.add(location.getWorld().getBlockAt(bx + x, by + y, bz + z));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onBlockRegistered(Location location, boolean isPlacing) {
+        populateBlocks(location);
+        super.onBlockRegistered(location, isPlacing);
+    }
+
     @Override
     public void onServerTick() {
+        if (blocks.isEmpty() && getLocation() != null) {
+            populateBlocks(getLocation());
+        }
+
         if (!isJammed()) {
             if (getCharge() >= getScuPerCycle()) {
                 for (Block crop : blocks) {
@@ -73,15 +100,22 @@ public class InfernalFarm extends AutoFarm {
                             setCharge(getCharge() - getScuPerCycle());
 
                             ageable.setAge(0);
+                            crop.setBlockData(ageable);
                             crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getType());
-                            setJammed(!output(Material.NETHER_WART));
+                            if (!output(Material.NETHER_WART)) {
+                                buffer = Material.NETHER_WART;
+                                setJammed(true);
+                            }
                             break;
                         }
                     }
                 }
             }
         } else if (buffer != null) {
-            setJammed(!output(buffer));
+            if (output(buffer)) {
+                buffer = null;
+                setJammed(false);
+            }
         }
 
         super.onServerTick();
@@ -92,4 +126,3 @@ public class InfernalFarm extends AutoFarm {
         return 50.0;
     }
 }
-
