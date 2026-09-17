@@ -17,7 +17,7 @@ import io.github.thebusybiscuit.sensibletoolbox.items.components.MachineFrame;
 
 public class InfernalFarm extends AutoFarm {
 
-    private static final int RADIUS = 5;
+    private static final int RADIUS = 11;
 
     private final Set<Block> blocks = new HashSet<>();
     private Material buffer;
@@ -42,7 +42,7 @@ public class InfernalFarm extends AutoFarm {
 
     @Override
     public String[] getLore() {
-        return new String[] { "Automatically harvests and replants", "Nether Warts", "in a " + RADIUS + "x" + RADIUS + " Radius 2 Blocks above the Machine" };
+        return new String[] { "Automatically harvests and replants", "Nether Warts", "in an 11x11 Area (5 Block Radius) 2 Blocks above the Machine" };
     }
 
     @Override
