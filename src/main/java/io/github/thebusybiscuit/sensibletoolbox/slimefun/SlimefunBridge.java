@@ -27,6 +27,7 @@ import com.github.drakescraft_labs.slimefun4.api.items.ItemGroup;
 import com.github.drakescraft_labs.slimefun4.api.items.SlimefunItem;
 import com.github.drakescraft_labs.slimefun4.api.items.SlimefunItemStack;
 import com.github.drakescraft_labs.slimefun4.api.recipes.RecipeType;
+import com.github.drakescraft_labs.slimefun4.api.researches.Research;
 import com.github.drakescraft_labs.slimefun4.libraries.dough.recipes.MinecraftRecipe;
 
 public final class SlimefunBridge implements SlimefunAddon {
@@ -38,6 +39,10 @@ public final class SlimefunBridge implements SlimefunAddon {
 
         ItemGroup items = new ItemGroup(new NamespacedKey(plugin, "items"), new CustomItemStack(Material.SHEARS, "&7STB - Items"));
         ItemGroup blocks = new ItemGroup(new NamespacedKey(plugin, "blocks"), new CustomItemStack(Material.PURPLE_STAINED_GLASS, "&7STB - Blocks and Machines"));
+
+        Research toolsResearch = new Research(new NamespacedKey(plugin, "stb_tools"), 95101, "STB - Herramientas y Componentes", 20);
+        Research machinesResearch = new Research(new NamespacedKey(plugin, "stb_machines"), 95102, "STB - Maquinaria y Energía", 35);
+        Research storageResearch = new Research(new NamespacedKey(plugin, "stb_storage"), 95103, "STB - Almacenamiento Hiperespacial", 45);
 
         for (String id : SensibleToolboxPlugin.getInstance().getItemRegistry().getItemIds()) {
             BaseSTBItem item = SensibleToolboxPlugin.getInstance().getItemRegistry().getItemById(id);
@@ -115,7 +120,20 @@ public final class SlimefunBridge implements SlimefunAddon {
             }
 
             sfItem.register(this);
+
+            String lowerId = id.toLowerCase(Locale.ROOT);
+            if (lowerId.contains("storage") || lowerId.contains("hyper") || lowerId.contains("subspace") || lowerId.contains("enderbox")) {
+                storageResearch.addItems(sfItem);
+            } else if (item.toItemStack().getType().isBlock() || item instanceof Generator || lowerId.contains("module") || lowerId.contains("upgrade") || lowerId.contains("frame") || lowerId.contains("circuit") || lowerId.contains("relay") || lowerId.contains("cell") || lowerId.contains("battery") || lowerId.contains("engine")) {
+                machinesResearch.addItems(sfItem);
+            } else {
+                toolsResearch.addItems(sfItem);
+            }
         }
+
+        toolsResearch.register();
+        machinesResearch.register();
+        storageResearch.register();
 
         RecipeType masher = new RecipeType(new NamespacedKey(plugin, "masher"), SlimefunItem.getById("STB_MASHER").getItem());
         RecipeType fermenter = new RecipeType(new NamespacedKey(plugin, "fermenter"), SlimefunItem.getById("STB_FERMENTER").getItem());
