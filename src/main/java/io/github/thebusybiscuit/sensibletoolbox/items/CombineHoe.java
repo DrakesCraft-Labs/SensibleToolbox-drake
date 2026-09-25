@@ -117,7 +117,7 @@ public abstract class CombineHoe extends BaseSTBItem {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (b.getType() == Material.FARMLAND) {
-                plantSeeds(event.getPlayer(), b);
+                plantSeeds(event.getPlayer(), b, event.getHand());
                 event.setCancelled(true);
                 return;
             } else if (b.getType() == Material.DIRT || b.getType() == Material.GRASS_BLOCK) {
@@ -242,6 +242,20 @@ public abstract class CombineHoe extends BaseSTBItem {
 
         setSeedAmount(count);
         setSeedType(seeds);
+
+        if (player instanceof Player p) {
+            ItemStack main = p.getInventory().getItemInMainHand();
+            BaseSTBItem itemMain = SensibleToolbox.getItemRegistry().fromItemStack(main);
+            if (itemMain instanceof CombineHoe) {
+                updateHeldItemStack(p, EquipmentSlot.HAND);
+            } else {
+                ItemStack off = p.getInventory().getItemInOffHand();
+                BaseSTBItem itemOff = SensibleToolbox.getItemRegistry().fromItemStack(off);
+                if (itemOff instanceof CombineHoe) {
+                    updateHeldItemStack(p, EquipmentSlot.OFF_HAND);
+                }
+            }
+        }
     }
 
     private void populateSeedBag(InventoryGUI gui) {
@@ -261,7 +275,7 @@ public abstract class CombineHoe extends BaseSTBItem {
         }
     }
 
-    private void plantSeeds(Player player, Block b) {
+    private void plantSeeds(Player player, Block b, EquipmentSlot hand) {
         if (getSeedType() == null || getSeedAmount() == 0) {
             return;
         }
@@ -287,6 +301,7 @@ public abstract class CombineHoe extends BaseSTBItem {
 
         if (amountLeft < getSeedAmount()) {
             setSeedAmount(amountLeft);
+            updateHeldItemStack(player, hand);
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1.0F, 1.0F);
         }
     }
@@ -298,7 +313,7 @@ public abstract class CombineHoe extends BaseSTBItem {
 
         for (Block block : cuboid) {
             if (!block.equals(b) && (STBUtil.isPlant(block.getType()) || Tag.LEAVES.isTagged(block.getType()))) {
-                if (!SensibleToolbox.getProtectionManager().hasPermission(player, b, Interaction.BREAK_BLOCK)) {
+                if (SensibleToolbox.getProtectionManager().hasPermission(player, block, Interaction.BREAK_BLOCK)) {
                     block.getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, block.getType());
                     block.breakNaturally();
                 }

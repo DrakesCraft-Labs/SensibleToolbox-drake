@@ -51,9 +51,13 @@ import io.github.thebusybiscuit.sensibletoolbox.api.gui.STBGUIHolder;
 import io.github.thebusybiscuit.sensibletoolbox.api.items.BaseSTBBlock;
 import io.github.thebusybiscuit.sensibletoolbox.api.items.BaseSTBItem;
 import io.github.thebusybiscuit.sensibletoolbox.api.items.ItemAction;
+import io.github.thebusybiscuit.sensibletoolbox.blocks.machines.FiftyKBatteryBox;
+import io.github.thebusybiscuit.sensibletoolbox.blocks.machines.TenKBatteryBox;
 import io.github.thebusybiscuit.sensibletoolbox.core.STBItemRegistry;
 import io.github.thebusybiscuit.sensibletoolbox.core.gui.STBInventoryGUI;
 import io.github.thebusybiscuit.sensibletoolbox.core.storage.LocationManager;
+import io.github.thebusybiscuit.sensibletoolbox.items.energycells.FiftyKEnergyCell;
+import io.github.thebusybiscuit.sensibletoolbox.items.energycells.TenKEnergyCell;
 import io.github.thebusybiscuit.sensibletoolbox.utils.STBUtil;
 import me.desht.dhutils.Debugger;
 import me.desht.dhutils.MiscUtil;
@@ -335,6 +339,24 @@ public class GeneralListener extends STBBaseListener {
         }
 
         BaseSTBItem result = SensibleToolbox.getItemRegistry().fromItemStack(event.getRecipe().getResult());
+        if (result instanceof TenKBatteryBox) {
+            for (ItemStack ingredient : event.getInventory().getMatrix()) {
+                if (SensibleToolbox.getItemRegistry().isSTBItem(ingredient, FiftyKEnergyCell.class)) {
+                    result = new FiftyKBatteryBox();
+                    event.getInventory().setResult(result.toItemStack());
+                    break;
+                }
+            }
+        } else if (result instanceof FiftyKBatteryBox) {
+            for (ItemStack ingredient : event.getInventory().getMatrix()) {
+                if (SensibleToolbox.getItemRegistry().isSTBItem(ingredient, TenKEnergyCell.class)) {
+                    result = new TenKBatteryBox();
+                    event.getInventory().setResult(result.toItemStack());
+                    break;
+                }
+            }
+        }
+
         if (result != null) {
             // ensure that everyone viewing the crafting inventory has permission to craft the item
             for (HumanEntity he : event.getViewers()) {
@@ -358,8 +380,8 @@ public class GeneralListener extends STBBaseListener {
             BaseSTBItem item = SensibleToolbox.getItemRegistry().fromItemStack(ingredient);
 
             if (item != null) {
-                if (!item.isIngredientFor(event.getRecipe().getResult())) {
-                    Debugger.getInstance().debug(item + " is not an ingredient for " + event.getRecipe().getResult());
+                if (!item.isIngredientFor(result.toItemStack())) {
+                    Debugger.getInstance().debug(item + " is not an ingredient for " + result.toItemStack());
                     event.getInventory().setResult(null);
                     break;
                 } else if (item instanceof Chargeable && result instanceof Chargeable) {
