@@ -4,7 +4,7 @@
 
 # 🧪 SensibleToolbox-Drake
 
-**Automatización modular, logística avanzada de ítems, energía SCU y maquinaria industrial para Slimefun4.**
+**Modular automation, advanced item logistics, SCU energy systems, and industrial machinery for Slimefun4.**
 
 <p>
   <a href="https://github.com/DrakesCraft-Labs/SensibleToolbox-drake"><img src="https://img.shields.io/badge/GitHub-SensibleToolbox--Drake-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
@@ -13,110 +13,118 @@
   <img src="https://img.shields.io/badge/Java-21-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21"/>
 </p>
 
+[🇬🇧 **English**](README.md) · [🇪🇸 **Español**](README_ES.md)
+
 </div>
 
-> ### 🏰 ¡Únete a la Comunidad Oficial de DrakesCraft!
+> ### 🏰 Join the Official DrakesCraft Community!
 > 
-> * 🎮 **IP del Servidor**: `mc.drakescraft.cl` *(Java 1.21.11 & Bedrock)*
-> * 💬 **Discord Oficial**: [discord.gg/drakescraft](https://discord.gg/rv3vtXZTk7)
-> * 🌐 **Web & Guía**: [web.drakescraft.cl](https://web.drakescraft.cl) — 🛒 **Tienda**: [web.drakescraft.cl/store](https://web.drakescraft.cl/store.html)
+> * 🎮 **Server IP**: `mc.drakescraft.cl` *(Java 1.21.11 & Bedrock Port 25565 / 19132)*
+> * 💬 **Official Discord**: [discord.gg/drakescraft](https://discord.gg/rv3vtXZTk7) — *Check out `#general-english`!*
+> * 🌐 **Website & Guides**: [web.drakescraft.cl](https://web.drakescraft.cl) — 🛒 **Store**: [web.drakescraft.cl/store](https://web.drakescraft.cl/store.html)
 > 
-> *¡Juega con este addon y más de 80 expansiones optimizadas en vivo en nuestra network de supervivencia técnica!*
+> *Play with this addon alongside 80+ optimized expansions live on our technical survival network!*
 
 ---
 
----
+## 📖 What is SensibleToolbox-Drake?
 
-## 📖 ¿Qué es SensibleToolbox-Drake?
+**SensibleToolbox-Drake** is a comprehensive automation, logistics, and practical engineering expansion for **Slimefun4**. Designed to optimize complex factories, massive item storage arrays, directional pneumatic piping networks, and autonomous farms with zero TPS impact.
 
-**SensibleToolbox-Drake** es una expansión integral de automatización y tecnología práctica para **Slimefun4**, diseñada para optimizar factorías, sistemas de almacenamiento a gran escala, logística de transporte por tubos direccionales y granjas totalmente autónomas.
-
-Todo el contenido se investiga y fabrica directamente desde la **Guía de Slimefun (`/sf guide`)** en la categoría temática de *SensibleToolbox*.
+All items, machines, and tools are researched and crafted directly through the **Slimefun Guide (`/sf guide`)** under the *SensibleToolbox* category.
 
 ---
 
-## ⚙️ Características y Maquinaria Principal
+## ⚙️ Key Features & Machinery
 
-### 🌾 1. Automatización Agrícola y Ganadera
-* **AutoFarm & FastFarm**: Siembra y cosecha automática de cultivos con soporte para azadones combinados (`CombineHoe`).
-* **AutoForester**: Tala y reforestación automática de árboles para suministro continuo de madera.
-* **AutoShearer**: Esquilado automatizado de ovejas con recolección directa en inventario interno.
-* **Watering Can & Soil Saturation**: Regaderas técnicas que aceleran el crecimiento del suelo agrícola circundante.
+### 🌾 1. Agricultural & Livestock Automation
+* **AutoFarm & FastFarm**: Automated crop planting and harvesting with integrated `CombineHoe` durability support.
+* **AutoForester**: Automatic tree chopping and sapling replanting for sustained lumber production.
+* **AutoShearer**: Automated sheep shearing with direct extraction into internal machine storage.
+* **Watering Can & Soil Saturation**: Technical watering cans that accelerate crops growth in surrounding farmland.
 
-### 📦 2. Logística, Filtros y Transporte de Ítems
-* **Item Router**: Distribuidor inteligente configurable por caras (norte, sur, este, oeste, arriba, abajo) con reglas de inserción y extracción.
-* **Directional Hopper & Dense Pipe**: Tolvas direccionales de alta velocidad y tuberías densas para transporte masivo de objetos sin lag de entidades.
-* **Item Filter & Throttler**: Módulos de filtrado por whitelist/blacklist y reguladores de flujo para evitar saturaciones.
-* **BigStorageUnit & EnderStorageUnit (BSU / ESU)**: Unidades de almacenamiento masivo digital de un solo tipo de ítem con capacidad de cientos de miles de unidades.
-* **EnderPacker & EnderBox**: Empaquetado y teletransporte cuántico de inventarios enlazados con `EnderTuner`.
+### 📦 2. Logistics, Filters & Item Routing
+* **Item Router**: Intelligent multi-face distributor (North, South, East, West, Up, Down) with customizable input/output extraction rules.
+* **Directional Hopper & Dense Pipe**: High-speed directional hoppers and dense piping networks for entity-free, lag-free bulk item routing.
+* **Item Filter & Throttler**: Configurable whitelist/blacklist sorting modules and rate limiters to prevent buffer overflow.
+* **BigStorageUnit & EnderStorageUnit (BSU / ESU)**: Massive single-item digital storage vaults holding hundreds of thousands of items with live digital indicators.
+* **EnderPacker & EnderBox**: Quantum inventory packaging and teleportation linked via `EnderTuner`.
 
-### ⚡ 3. Sistema Energético SCU (Sensible Charge Units)
-* **SCU Power Grid & PowerBuffer**: Redes eléctricas modulares con cables de transferencia y acumuladores de carga.
-* **BioEngine & FuelEngine**: Generadores térmicos a base de biocombustibles y materiales orgánicos.
-* **Solar Cell & Solar Panel Array**: Paneles solares diurnos para recarga pasiva de condensadores y baterías portátiles.
+### ⚡ 3. SCU Power Grid (Sensible Charge Units)
+* **SCU Power Grid & PowerBuffer**: Modular electrical networks with multi-conductor transfer cables and high-capacity battery banks.
+* **BioEngine & FuelEngine**: Thermal generators fueled by biomass, biofuels, and combustible organic matter.
+* **Solar Cell & Solar Panel Array**: Daylight solar collectors for passive recharge of portable capacitors and battery cells.
 
-### 🔨 4. Procesamiento y Crafteo Automático
-* **AutoSmelter & FastAutoSmelter**: Hornos industriales continuos de alta velocidad compatibles con mejoras de aceleración.
-* **AutoAnvil & AutoDisenchanter**: Reparación automática de herramientas y extracción segura de encantamientos a libros.
-* **Masher & Silicon Furnace**: Trituración de minerales para duplicación de recursos y fundición de silicio para electrónica avanzada.
-* **Thaumic Enchanter**: Mesa mágica que aplica encantamientos avanzados con consumo de energía SCU.
+### 🔨 4. Automated Processing & Crafting
+* **AutoSmelter & FastAutoSmelter**: High-throughput continuous smelting furnaces compatible with speed upgrade modules.
+* **AutoAnvil & AutoDisenchanter**: Automatic tool repair and safe enchantment stripping directly into enchanted books.
+* **Masher & Silicon Furnace**: Ore pulverization for ore-doubling yields and industrial silicon smelting for advanced electronics.
+* **Thaumic Enchanter**: Arcane enchanting workstation applying advanced enchantments fueled by SCU energy.
 
-### 🛠️ 5. Herramientas Especiales y Medición
-* **Multimeter & Tape Measure**: Medidores en tiempo real de flujo de energía SCU, niveles de luz y distancias en bloques.
-* **MultiBuilder & Paint Brush / Roller**: Construcción masiva en área y pintado de bloques compatibles con latas de pintura (`PaintCan`).
-* **Sound Muffler**: Bloque amortiguador de ruidos mecánicos y chillidos de granjas en un radio configurable.
-* **Elevator & Ender Elevator**: Plataformas de teletransporte vertical instantáneo entre pisos.
+### 🛠️ 5. Utility Tools & Construction
+* **Multimeter & Tape Measure**: Real-time diagnostic meters measuring SCU energy throughput, ambient light levels, and exact 3D block distances.
+* **MultiBuilder & Paint Brush / Roller**: Large-scale area construction tools and multi-surface block painting compatible with `PaintCan` pigments.
+* **Sound Muffler**: Acoustic dampener block suppressing mechanical machine noise and mob farm sounds within a configurable radius.
+* **Elevator & Ender Elevator**: Instantaneous vertical teleportation platforms between marked floor stages.
 
-### ⚡ 6. Módulos de Mejora (Upgrades)
-* **Speed Upgrade**: Aumenta drásticamente la velocidad de procesamiento de las máquinas a cambio de mayor consumo energético.
-* **Regulator Upgrade**: Controla y estabiliza la tasa de extracción de objetos.
-* **Ejector Upgrade**: Expulsa automáticamente los productos resultantes hacia inventarios adyacentes.
-* **Thoroughness Upgrade**: Maximiza el rendimiento y eficiencia por operación.
+### ⚡ 6. Machine Upgrade Modules
+* **Speed Upgrade**: Drastically accelerates machine tick execution in exchange for higher SCU energy consumption.
+* **Regulator Upgrade**: Regulates and stabilizes extraction rates to prevent grid overdraw.
+* **Ejector Upgrade**: Automatically pushes processed products into adjacent inventory containers.
+* **Thoroughness Upgrade**: Maximizes yield efficiency per processing operation.
 
-### 🤝 7. Red de amistades
-* **`/stb friend <jugador>`**: Añade un perfil registrado a tu red de confianza.
-* **`/stb unfriend <jugador>`**: Retira un perfil registrado de tu red de confianza.
-* Los nombres inexistentes o UUID no registrados se rechazan con un mensaje claro, sin crear perfiles artificiales ni generar excepciones en consola.
+### 🤝 7. Social Trust Network
+* **`/stb friend <player>`**: Grants trusted access to a registered player on your private STB networks and security vaults.
+* **`/stb unfriend <player>`**: Revokes trust permissions.
+* Fully validated with offline UUID resolution; invalid player names are rejected gracefully without causing server-side exceptions.
 
 ---
 
-## 📋 Compatibilidad Técnica
+## 📋 Technical Compatibility
 
-| Parámetro | Requisito |
+| Parameter | Requirement |
 |---|---|
-| **Servidor** | Paper / Purpur / Folia **1.21.11** |
-| **Java** | **Java 21** LTS |
-| **Core Requerido** | [Slimefun4-Drake](https://github.com/DrakesCraft-Labs/Slimefun4-Drake) |
-| **Arquitectura** | 100% Server-side (no requiere mods ni clientes modificados en los jugadores) |
+| **Server Software** | Paper / Purpur / Folia **1.21.11** |
+| **Java Runtime** | **Java 21** LTS |
+| **Required Core** | [Slimefun4-Drake](https://github.com/DrakesCraft-Labs/Slimefun4-Drake) |
+| **Architecture** | 100% Server-Side (Vanilla Minecraft clients can join without installing client mods) |
 
 ---
 
-## 📥 Instalación
+## 📥 Installation
 
-1. Descarga la última versión de `SensibleToolbox-drake.jar` desde la pestaña [Versions](https://modrinth.com/mod/sensibletoolbox-drake/versions).
-2. Coloca el archivo `.jar` en la carpeta `plugins/` de tu servidor Minecraft junto a `Slimefun4-Drake.jar`.
-3. Inicia o reinicia el servidor. Las recetas y categorías aparecerán automáticamente en `/sf guide`.
+1. Download the latest release of `SensibleToolbox-drake.jar` from the [Versions](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake/releases) page.
+2. Place the `.jar` file into your server's `plugins/` directory alongside `Slimefun4-Drake.jar`.
+3. Start or restart your server. Categories and recipes will automatically appear in `/sf guide`.
 
-## ✅ Verificación
+---
 
-El reactor Maven ejecuta las pruebas JUnit 5 con `mvn clean test`. La suite cubre la carga base y la resolución segura de perfiles usada por los comandos de amistad.
+## 🛠️ Building from Source
+
+```bash
+git clone https://github.com/DrakesCraft-Labs/SensibleToolbox-drake.git
+cd SensibleToolbox-drake
+mvn clean package
+```
+
+The compiled artifact will be located under `target/SensibleToolbox-drake.jar`.
 
 ---
 
 <div align="center">
 
-**Desarrollado y Mantenido por [DrakesCraft Labs](https://github.com/DrakesCraft-Labs)**  
-*Basado en el diseño original de desht.*  
-Licencia **GPL-3.0-only**.
+**Developed and Maintained by [DrakesCraft Labs](https://github.com/DrakesCraft-Labs)**  
+*Based on the original design by desht.*  
+Licensed under **GPL-3.0-only**.
 
 </div>
 
-## ⚖️ Upstream Attribution & License / Licencia y Créditos
+## ⚖️ Upstream Attribution & License
 
-- **Original Project / Upstream**: Slimefun4 Community Addon.
-- **Port & Maintenance**: DrakesCraft Labs team (Compatibility for Paper / Purpur 1.21.11).
-- **License**: GPL-3.0 / MIT.
+- **Original Project / Upstream**: Slimefun4 Community Addon (originally authored by desht).
+- **Port & Maintenance**: DrakesCraft Labs team (Modernization and compatibility for Paper / Purpur 1.21.11 & Java 21).
+- **License**: GNU General Public License v3.0 (GPL-3.0-only).
 - **Source Code**: [GitHub Repository](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake)
 - **Support & Issues**: [GitHub Issues](https://github.com/DrakesCraft-Labs/SensibleToolbox-drake/issues) | [Discord](https://discord.gg/rv3vtXZTk7)
 
-*This project is an open-source derivative work maintained by DrakesCraft Labs under the terms of its original license. All original assets and concepts belong to their respective creators.*
+*This project is an open-source derivative work maintained by DrakesCraft Labs under the terms of its original license. All original assets, concepts, and trademarks belong to their respective creators.*
