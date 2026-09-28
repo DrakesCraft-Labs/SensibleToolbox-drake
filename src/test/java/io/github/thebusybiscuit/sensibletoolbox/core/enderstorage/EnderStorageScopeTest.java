@@ -3,7 +3,10 @@ package io.github.thebusybiscuit.sensibletoolbox.core.enderstorage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.io.File;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.World;
 import org.junit.jupiter.api.AfterEach;
@@ -63,5 +66,46 @@ class EnderStorageScopeTest {
     void fallsBackToBaseWorldWhenNoMappingConfigured() {
         World nether = server.addSimpleWorld("customworld_nether");
         assertEquals("customworld", EnderStorageScope.forWorld(nether, Map.of()));
+    }
+
+    @Test
+    void delayedSaveIdentityKeepsSameFrequencyInDistinctScopes() {
+        TestHolder slimefun = new TestHolder(new File("slimefun/global/7"), 7);
+        TestHolder skyblock = new TestHolder(new File("skyblock/global/7"), 7);
+        TestHolder duplicateSlimefun = new TestHolder(new File("slimefun/global/7"), 7);
+
+        assertNotEquals(slimefun, skyblock);
+        assertEquals(slimefun, duplicateSlimefun);
+
+        Set<STBEnderStorageHolder> pendingSaves = new HashSet<>();
+        pendingSaves.add(slimefun);
+        pendingSaves.add(skyblock);
+
+        assertEquals(2, pendingSaves.size());
+    }
+
+    private static final class TestHolder extends STBEnderStorageHolder {
+
+        private final File saveFile;
+
+        private TestHolder(File saveFile, int frequency) {
+            super(null, frequency);
+            this.saveFile = saveFile;
+        }
+
+        @Override
+        public File getSaveFile() {
+            return saveFile;
+        }
+
+        @Override
+        public String getInventoryTitle() {
+            return "test";
+        }
+
+        @Override
+        public boolean isGlobal() {
+            return true;
+        }
     }
 }
