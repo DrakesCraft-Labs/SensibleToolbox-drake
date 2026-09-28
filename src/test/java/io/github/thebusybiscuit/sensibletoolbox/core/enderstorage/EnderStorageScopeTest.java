@@ -3,6 +3,8 @@ package io.github.thebusybiscuit.sensibletoolbox.core.enderstorage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.util.Map;
+
 import org.bukkit.World;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +13,12 @@ import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 
 class EnderStorageScopeTest {
+
+    private static final Map<String, String> MODALITIES = Map.of(
+            "world", "slimefun",
+            "bskyblock", "skyblock",
+            "oneblock", "oneblock",
+            "clasico", "clasico");
 
     private ServerMock server;
 
@@ -26,14 +34,34 @@ class EnderStorageScopeTest {
 
     @Test
     void nullWorldKeepsTheLegacyNamespaceForApiCompatibility() {
-        assertEquals("legacy", EnderStorageScope.forWorld(null));
+        assertEquals("legacy", EnderStorageScope.forWorld(null, MODALITIES));
     }
 
     @Test
-    void distinctWorldsAlwaysUseDistinctStorageNamespaces() {
-        World first = server.addSimpleWorld("first");
-        World second = server.addSimpleWorld("second");
+    void dimensionsAndSubworldsOfSameModalityShareScope() {
+        World overworld = server.addSimpleWorld("world");
+        World nether = server.addSimpleWorld("world_nether");
+        World end = server.addSimpleWorld("world_the_end");
+        World mars = server.addSimpleWorld("world_galactifun_mars");
 
-        assertNotEquals(EnderStorageScope.forWorld(first), EnderStorageScope.forWorld(second));
+        assertEquals("slimefun", EnderStorageScope.forWorld(overworld, MODALITIES));
+        assertEquals("slimefun", EnderStorageScope.forWorld(nether, MODALITIES));
+        assertEquals("slimefun", EnderStorageScope.forWorld(end, MODALITIES));
+        assertEquals("slimefun", EnderStorageScope.forWorld(mars, MODALITIES));
+    }
+
+    @Test
+    void differentModalitiesUseDifferentScopes() {
+        World survival = server.addSimpleWorld("world");
+        World skyblock = server.addSimpleWorld("bskyblock_world");
+
+        assertEquals("skyblock", EnderStorageScope.forWorld(skyblock, MODALITIES));
+        assertNotEquals(EnderStorageScope.forWorld(survival, MODALITIES), EnderStorageScope.forWorld(skyblock, MODALITIES));
+    }
+
+    @Test
+    void fallsBackToBaseWorldWhenNoMappingConfigured() {
+        World nether = server.addSimpleWorld("customworld_nether");
+        assertEquals("customworld", EnderStorageScope.forWorld(nether, Map.of()));
     }
 }

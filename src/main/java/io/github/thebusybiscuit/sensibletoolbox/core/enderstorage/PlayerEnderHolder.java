@@ -1,11 +1,14 @@
 package io.github.thebusybiscuit.sensibletoolbox.core.enderstorage;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 
 import io.github.thebusybiscuit.sensibletoolbox.utils.UnicodeSymbol;
+import me.desht.dhutils.text.LogUtils;
 
 public class PlayerEnderHolder extends STBEnderStorageHolder {
 
@@ -25,8 +28,23 @@ public class PlayerEnderHolder extends STBEnderStorageHolder {
     @Override
     public File getSaveFile() {
         File root = EnderStorageScope.LEGACY_SCOPE.equals(scope) ? getManager().getStorageDir() : new File(getManager().getStorageDir(), scope);
-        File f = new File(root, getPlayer().getUniqueId().toString());
-        return new File(f, Integer.toString(getFrequency()));
+        File playerDir = new File(root, getPlayer().getUniqueId().toString());
+        File newFile = new File(playerDir, Integer.toString(getFrequency()));
+
+        // Migración: los datos antiguos (formato sin modalidad, en la raíz) se mueven UNA
+        // vez a la modalidad principal, sin duplicar, para que nadie pierda sus ítems.
+        if (!newFile.isFile() && getManager().isLegacyTarget(scope)) {
+            File legacy = new File(new File(getManager().getStorageDir(), getPlayer().getUniqueId().toString()), Integer.toString(getFrequency()));
+            if (legacy.isFile() && !legacy.equals(newFile)) {
+                try {
+                    playerDir.mkdirs();
+                    Files.move(legacy.toPath(), newFile.toPath());
+                } catch (IOException e) {
+                    LogUtils.warning("No se pudo migrar ender storage legacy " + legacy + ": " + e.getMessage());
+                }
+            }
+        }
+        return newFile;
     }
 
     @Override

@@ -43,3 +43,19 @@ item_settings:
 options:
   auto-update: true
   glowing_items: false
+
+# Aislamiento del Ender Storage (Ender Bag / Ender Box) por MODALIDAD.
+# Todas las dimensiones y sub-mundos de una modalidad comparten el mismo Ender Bag
+# (survival overworld + nether + end + planetas galactifun = "slimefun"), pero no se
+# pueden pasar objetos ENTRE modalidades (slimefun <-> skyblock, etc.).
+enderstorage:
+  # Modalidad a la que se migran, UNA vez y sin duplicar, los almacenamientos del
+  # formato antiguo (sin modalidad). Debe ser la modalidad principal (survival).
+  legacy_modality: slimefun
+  # Prefijo del nombre del mundo -> modalidad. Gana el prefijo mas largo que coincida.
+  modalities:
+    world: slimefun
+    bskyblock: skyblock
+    clasico: clasico
+    oneblock: oneblock
+    laboratorio: laboratorio

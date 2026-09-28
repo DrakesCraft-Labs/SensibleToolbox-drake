@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -36,8 +38,20 @@ public class EnderStorageManager implements Listener {
 
     private static final FilenameFilter uuidFilter = (dir, name) -> MiscUtil.looksLikeUUID(name);
 
+    // Mapeo prefijo-de-mundo -> modalidad y la modalidad a la que migran los datos antiguos.
+    private final Map<String, String> modalityPrefixes = new HashMap<>();
+    private final String legacyModality;
+
     public EnderStorageManager(SensibleToolboxPlugin plugin) {
         storageDir = new File(plugin.getDataFolder(), ENDER_STORAGE_DIR);
+
+        this.legacyModality = plugin.getConfig().getString("enderstorage.legacy_modality", "slimefun");
+        ConfigurationSection modalities = plugin.getConfig().getConfigurationSection("enderstorage.modalities");
+        if (modalities != null) {
+            for (String prefix : modalities.getKeys(false)) {
+                modalityPrefixes.put(prefix.toLowerCase(Locale.ROOT), modalities.getString(prefix));
+            }
+        }
 
         if (!storageDir.exists()) {
             setupStorageStructure(plugin, storageDir);
@@ -48,13 +62,23 @@ public class EnderStorageManager implements Listener {
         return storageDir;
     }
 
+    /** Modalidad (scope) a la que pertenece un mundo. */
+    public String scopeFor(World world) {
+        return EnderStorageScope.forWorld(world, modalityPrefixes);
+    }
+
+    /** True si este scope es la modalidad principal a la que migran los datos antiguos. */
+    public boolean isLegacyTarget(String scope) {
+        return legacyModality.equals(scope);
+    }
+
     public GlobalEnderHolder getGlobalInventoryHolder(int frequency) {
         return getGlobalInventoryHolder(null, frequency);
     }
 
     public GlobalEnderHolder getGlobalInventoryHolder(World world, int frequency) {
         Validate.isTrue(frequency > 0 && frequency <= MAX_ENDER_FREQUENCY, "Frequency out of range: " + frequency);
-        String scope = EnderStorageScope.forWorld(world);
+        String scope = scopeFor(world);
         Map<Integer, GlobalEnderHolder> inventories = globalInvs.computeIfAbsent(scope, ignored -> new HashMap<>());
         GlobalEnderHolder h = inventories.get(frequency);
 
@@ -79,7 +103,7 @@ public class EnderStorageManager implements Listener {
 
     public PlayerEnderHolder getPlayerInventoryHolder(OfflinePlayer player, World world, Integer frequency) {
         Validate.isTrue(frequency > 0 && frequency <= MAX_ENDER_FREQUENCY, "Frequency out of range: " + frequency);
-        String scope = EnderStorageScope.forWorld(world);
+        String scope = scopeFor(world);
         Map<String, Map<Integer, PlayerEnderHolder>> scopedInventories = playerInvs.computeIfAbsent(player.getUniqueId(), ignored -> new HashMap<>());
         Map<Integer, PlayerEnderHolder> map = scopedInventories.computeIfAbsent(scope, ignored -> new HashMap<>());
 
