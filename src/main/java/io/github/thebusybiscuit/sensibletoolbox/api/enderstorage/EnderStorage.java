@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.sensibletoolbox.api.enderstorage;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.inventory.Inventory;
 
 import io.github.thebusybiscuit.sensibletoolbox.api.SensibleToolbox;
@@ -37,6 +38,10 @@ public final class EnderStorage {
         return getEnderStorageHolder(player, frequency).getInventory();
     }
 
+    public static Inventory getEnderInventory(OfflinePlayer player, World world, int frequency) {
+        return getEnderStorageHolder(player, world, frequency).getInventory();
+    }
+
     /**
      * Get the global ender inventory for the given frequency. Note that this
      * inventory is <em>not</em> related to the inventory returned by the
@@ -48,6 +53,10 @@ public final class EnderStorage {
      */
     public static Inventory getEnderInventory(int frequency) {
         return getEnderStorageHolder(frequency).getInventory();
+    }
+
+    public static Inventory getEnderInventory(World world, int frequency) {
+        return getEnderStorageHolder(world, frequency).getInventory();
     }
 
     /**
@@ -64,6 +73,10 @@ public final class EnderStorage {
         return SensibleToolbox.getPluginInstance().getEnderStorageManager().getPlayerInventoryHolder(player, frequency);
     }
 
+    public static EnderStorageHolder getEnderStorageHolder(OfflinePlayer player, World world, int frequency) {
+        return SensibleToolbox.getPluginInstance().getEnderStorageManager().getPlayerInventoryHolder(player, world, frequency);
+    }
+
     /**
      * Get the global ender inventory holder for the given frequency.
      *
@@ -75,5 +88,8 @@ public final class EnderStorage {
         return SensibleToolbox.getPluginInstance().getEnderStorageManager().getGlobalInventoryHolder(frequency);
     }
 
-}
+    public static EnderStorageHolder getEnderStorageHolder(World world, int frequency) {
+        return SensibleToolbox.getPluginInstance().getEnderStorageManager().getGlobalInventoryHolder(world, frequency);
+    }
 
+}

@@ -10,10 +10,12 @@ import io.github.thebusybiscuit.sensibletoolbox.utils.UnicodeSymbol;
 public class PlayerEnderHolder extends STBEnderStorageHolder {
 
     private final OfflinePlayer player;
+    private final String scope;
 
-    protected PlayerEnderHolder(EnderStorageManager manager, OfflinePlayer player, int frequency) {
+    protected PlayerEnderHolder(EnderStorageManager manager, OfflinePlayer player, String scope, int frequency) {
         super(manager, frequency);
         this.player = player;
+        this.scope = scope;
     }
 
     public OfflinePlayer getPlayer() {
@@ -22,7 +24,8 @@ public class PlayerEnderHolder extends STBEnderStorageHolder {
 
     @Override
     public File getSaveFile() {
-        File f = new File(getManager().getStorageDir(), getPlayer().getUniqueId().toString());
+        File root = EnderStorageScope.LEGACY_SCOPE.equals(scope) ? getManager().getStorageDir() : new File(getManager().getStorageDir(), scope);
+        File f = new File(root, getPlayer().getUniqueId().toString());
         return new File(f, Integer.toString(getFrequency()));
     }
 
@@ -63,4 +66,3 @@ public class PlayerEnderHolder extends STBEnderStorageHolder {
         return false;
     }
 }
-

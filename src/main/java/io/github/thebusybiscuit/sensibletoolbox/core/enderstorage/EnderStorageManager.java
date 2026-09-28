@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -29,8 +30,8 @@ public class EnderStorageManager implements Listener {
     private static final String ENDER_STORAGE_DIR = "enderstorage";
     private final File storageDir;
 
-    private final Map<Integer, GlobalEnderHolder> globalInvs = new HashMap<>();
-    private final Map<UUID, Map<Integer, PlayerEnderHolder>> playerInvs = new HashMap<>();
+    private final Map<String, Map<Integer, GlobalEnderHolder>> globalInvs = new HashMap<>();
+    private final Map<UUID, Map<String, Map<Integer, PlayerEnderHolder>>> playerInvs = new HashMap<>();
     private final Set<EnderStorageHolder> updateNeeded = new HashSet<>();
 
     private static final FilenameFilter uuidFilter = (dir, name) -> MiscUtil.looksLikeUUID(name);
@@ -48,15 +49,21 @@ public class EnderStorageManager implements Listener {
     }
 
     public GlobalEnderHolder getGlobalInventoryHolder(int frequency) {
+        return getGlobalInventoryHolder(null, frequency);
+    }
+
+    public GlobalEnderHolder getGlobalInventoryHolder(World world, int frequency) {
         Validate.isTrue(frequency > 0 && frequency <= MAX_ENDER_FREQUENCY, "Frequency out of range: " + frequency);
-        GlobalEnderHolder h = globalInvs.get(frequency);
+        String scope = EnderStorageScope.forWorld(world);
+        Map<Integer, GlobalEnderHolder> inventories = globalInvs.computeIfAbsent(scope, ignored -> new HashMap<>());
+        GlobalEnderHolder h = inventories.get(frequency);
 
         if (h == null) {
-            h = new GlobalEnderHolder(this, frequency);
+            h = new GlobalEnderHolder(this, scope, frequency);
 
             try {
                 h.loadInventory();
-                globalInvs.put(frequency, h);
+                inventories.put(frequency, h);
             } catch (IOException e) {
                 LogUtils.severe("Can't load global ender storage: " + h.getSaveFile());
                 return null;
@@ -67,18 +74,19 @@ public class EnderStorageManager implements Listener {
     }
 
     public PlayerEnderHolder getPlayerInventoryHolder(OfflinePlayer player, Integer frequency) {
-        Validate.isTrue(frequency > 0 && frequency <= MAX_ENDER_FREQUENCY, "Frequency out of range: " + frequency);
-        Map<Integer, PlayerEnderHolder> map = playerInvs.get(player.getUniqueId());
+        return getPlayerInventoryHolder(player, null, frequency);
+    }
 
-        if (map == null) {
-            map = new HashMap<>();
-            playerInvs.put(player.getUniqueId(), map);
-        }
+    public PlayerEnderHolder getPlayerInventoryHolder(OfflinePlayer player, World world, Integer frequency) {
+        Validate.isTrue(frequency > 0 && frequency <= MAX_ENDER_FREQUENCY, "Frequency out of range: " + frequency);
+        String scope = EnderStorageScope.forWorld(world);
+        Map<String, Map<Integer, PlayerEnderHolder>> scopedInventories = playerInvs.computeIfAbsent(player.getUniqueId(), ignored -> new HashMap<>());
+        Map<Integer, PlayerEnderHolder> map = scopedInventories.computeIfAbsent(scope, ignored -> new HashMap<>());
 
         PlayerEnderHolder h = map.get(frequency);
 
         if (h == null) {
-            h = new PlayerEnderHolder(this, player, frequency);
+            h = new PlayerEnderHolder(this, player, scope, frequency);
 
             try {
                 h.loadInventory();
@@ -125,7 +133,7 @@ public class EnderStorageManager implements Listener {
     }
 
     void mkdir(File dir) {
-        Validate.isTrue(dir.mkdir(), "can't create directory: " + dir);
+        Validate.isTrue(dir.isDirectory() || dir.mkdirs(), "can't create directory: " + dir);
     }
 
     void setChanged(EnderStorageHolder holder) {
@@ -150,4 +158,3 @@ public class EnderStorageManager implements Listener {
         }
     }
 }
-

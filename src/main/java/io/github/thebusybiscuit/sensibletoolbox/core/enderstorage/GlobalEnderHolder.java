@@ -8,8 +8,11 @@ import java.io.File;
 
 public class GlobalEnderHolder extends STBEnderStorageHolder {
 
-    public GlobalEnderHolder(EnderStorageManager manager, int frequency) {
+    private final String scope;
+
+    public GlobalEnderHolder(EnderStorageManager manager, String scope, int frequency) {
         super(manager, frequency);
+        this.scope = scope;
     }
 
     @Override
@@ -19,7 +22,8 @@ public class GlobalEnderHolder extends STBEnderStorageHolder {
 
     @Override
     public File getSaveFile() {
-        File global = new File(getManager().getStorageDir(), "global");
+        File root = EnderStorageScope.LEGACY_SCOPE.equals(scope) ? getManager().getStorageDir() : new File(getManager().getStorageDir(), scope);
+        File global = new File(root, "global");
         return new File(global, Integer.toString(getFrequency()));
     }
 
@@ -34,4 +38,3 @@ public class GlobalEnderHolder extends STBEnderStorageHolder {
     }
 
 }
-

@@ -121,10 +121,9 @@ public class EnderBag extends BaseSTBItem implements EnderTunable {
                 }
             }
 
-            Inventory inv = isGlobal() ? EnderStorage.getEnderInventory(getEnderFrequency()) : EnderStorage.getEnderInventory(player, getEnderFrequency());
+            Inventory inv = isGlobal() ? EnderStorage.getEnderInventory(player.getWorld(), getEnderFrequency()) : EnderStorage.getEnderInventory(player, player.getWorld(), getEnderFrequency());
             player.openInventory(inv);
             event.setCancelled(true);
         }
     }
 }
-
