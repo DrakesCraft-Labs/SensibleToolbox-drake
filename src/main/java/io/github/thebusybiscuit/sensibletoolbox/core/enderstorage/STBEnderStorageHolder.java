@@ -3,6 +3,7 @@ package io.github.thebusybiscuit.sensibletoolbox.core.enderstorage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -142,12 +143,14 @@ public abstract class STBEnderStorageHolder implements EnderStorageHolder {
             return false;
         }
 
-        return frequency == ((STBEnderStorageHolder) o).frequency;
+        STBEnderStorageHolder other = (STBEnderStorageHolder) o;
+        // The delayed-save set must distinguish every persisted channel. A
+        // frequency alone is shared by players, global boxes and modalities.
+        return getSaveFile().equals(other.getSaveFile());
     }
 
     @Override
     public int hashCode() {
-        return frequency;
+        return Objects.hash(getClass(), getSaveFile());
     }
 }
-
