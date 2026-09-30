@@ -377,11 +377,14 @@ public class GeneralListener extends STBBaseListener {
         // prevent STB items being used where the vanilla material is expected
         // (e.g. 4 gold dust can't make a glowstone block even though gold dust uses glowstone dust for its material)
         for (ItemStack ingredient : event.getInventory().getMatrix()) {
+            if (ingredient == null) {
+                continue;
+            }
             BaseSTBItem item = SensibleToolbox.getItemRegistry().fromItemStack(ingredient);
 
             if (item != null) {
-                if (!item.isIngredientFor(result.toItemStack())) {
-                    Debugger.getInstance().debug(item + " is not an ingredient for " + result.toItemStack());
+                if (result == null || !item.isIngredientFor(result.toItemStack())) {
+                    Debugger.getInstance().debug(item + " is not an ingredient for " + (result != null ? result.toItemStack() : "null"));
                     event.getInventory().setResult(null);
                     break;
                 } else if (item instanceof Chargeable && result instanceof Chargeable) {
@@ -391,7 +394,7 @@ public class GeneralListener extends STBBaseListener {
             }
         }
 
-        if (finalSCU > 0) {
+        if (finalSCU > 0 && result instanceof Chargeable) {
             Chargeable c = (Chargeable) result;
             c.setCharge(Math.min(c.getMaxCharge(), finalSCU));
             event.getInventory().setResult(result.toItemStack());
@@ -414,11 +417,70 @@ public class GeneralListener extends STBBaseListener {
             }
 
             if (result.onCrafted()) {
-                event.getInventory().setResult(result.toItemStack(event.getInventory().getResult().getAmount()));
+                ItemStack res = event.getInventory().getResult();
+                int amount = res != null ? res.getAmount() : 1;
+                event.getInventory().setResult(result.toItemStack(amount));
             }
         }
 
         Debugger.getInstance().debug("resulting item now: " + event.getInventory().getResult());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onCraftItem(org.bukkit.event.inventory.CraftItemEvent event) {
+        if (event.getRecipe() == null) {
+            return;
+        }
+
+        BaseSTBItem result = SensibleToolbox.getItemRegistry().fromItemStack(event.getRecipe().getResult());
+
+        for (ItemStack ingredient : event.getInventory().getMatrix()) {
+            if (ingredient == null) {
+                continue;
+            }
+            BaseSTBItem item = SensibleToolbox.getItemRegistry().fromItemStack(ingredient);
+
+            if (item != null) {
+                if (result == null || !item.isIngredientFor(result.toItemStack())) {
+                    event.setCancelled(true);
+                    event.setResult(Result.DENY);
+                    if (event.getWhoClicked() instanceof Player) {
+                        MiscUtil.errorMessage((Player) event.getWhoClicked(), "You cannot use SensibleToolbox items in this recipe!");
+                    }
+                    return;
+                }
+            }
+        }
+
+        if (result != null) {
+            if (event.getWhoClicked() instanceof Player) {
+                Player player = (Player) event.getWhoClicked();
+                if (!result.checkPlayerPermission(player, ItemAction.CRAFT)) {
+                    event.setCancelled(true);
+                    event.setResult(Result.DENY);
+                    MiscUtil.errorMessage(player, "You don't have permission to craft this item.");
+                    return;
+                }
+            }
+
+            if (!result.validateCrafting(event.getInventory())) {
+                event.setCancelled(true);
+                event.setResult(Result.DENY);
+                return;
+            }
+
+            for (ItemStack ingredient : event.getInventory().getMatrix()) {
+                if (ingredient != null) {
+                    Class<? extends BaseSTBItem> c = result.getCraftingRestriction(ingredient.getType());
+
+                    if (c != null && !SensibleToolbox.getItemRegistry().isSTBItem(ingredient, c)) {
+                        event.setCancelled(true);
+                        event.setResult(Result.DENY);
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler
