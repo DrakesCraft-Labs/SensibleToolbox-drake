@@ -121,17 +121,62 @@ public class EnderBox extends BaseSTBBlock implements EnderTunable, STBInventory
     public void onInteractBlock(PlayerInteractEvent event) {
         super.onInteractBlock(event);
 
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && !event.getPlayer().isSneaking()) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Player player = event.getPlayer();
+            ItemStack inHand = event.getItem();
+            boolean hasDiamond = inHand != null && inHand.getType() == Material.DIAMOND;
 
-            if (!hasAccessRights(player)) {
-                STBUtil.complain(player, "That " + getItemName() + " is private!");
-            } else {
-                Inventory inv = isGlobal() ? EnderStorage.getEnderInventory(getLocation().getWorld(), getEnderFrequency()) : EnderStorage.getEnderInventory(player, getLocation().getWorld(), getEnderFrequency());
-                player.openInventory(inv);
-                player.playSound(getLocation(), Sound.BLOCK_CHEST_OPEN, 0.5F, 1.0F);
+            if (hasDiamond) {
+                if (isGlobal()) {
+                    if (!hasAccessRights(player)) {
+                        STBUtil.complain(player, "That " + getItemName() + " is private!");
+                        event.setCancelled(true);
+                        return;
+                    }
+                    if (player.getGameMode() != org.bukkit.GameMode.CREATIVE) {
+                        inHand.setAmount(inHand.getAmount() - 1);
+                    }
+                    setGlobal(false);
+                    setOwner(player.getUniqueId());
+                    player.sendMessage(ChatColor.AQUA + "[SensibleToolbox] " + ChatColor.GREEN + "Ender Box locked to PERSONAL/PRIVATE mode with Diamond!");
+                    player.playSound(getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.8F);
+                    event.setCancelled(true);
+                    return;
+                } else {
+                    if (player.getUniqueId().equals(getOwner())) {
+                        if (player.isSneaking()) {
+                            setGlobal(true);
+                            if (player.getGameMode() != org.bukkit.GameMode.CREATIVE) {
+                                player.getInventory().addItem(new ItemStack(Material.DIAMOND)).values()
+                                        .forEach(rem -> player.getWorld().dropItemNaturally(player.getLocation(), rem));
+                            }
+                            player.sendMessage(ChatColor.AQUA + "[SensibleToolbox] " + ChatColor.YELLOW + "Ender Box unlocked to GLOBAL mode. Diamond returned.");
+                            player.playSound(getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0F, 1.0F);
+                            event.setCancelled(true);
+                            return;
+                        } else {
+                            player.sendMessage(ChatColor.AQUA + "[SensibleToolbox] " + ChatColor.YELLOW + "This Ender Box is already Personal/Private. Sneak + right-click with a Diamond to unlock to Global.");
+                            event.setCancelled(true);
+                            return;
+                        }
+                    } else {
+                        STBUtil.complain(player, "That " + getItemName() + " is private to " + Bukkit.getOfflinePlayer(getOwner()).getName() + "!");
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
             }
-            event.setCancelled(true);
+
+            if (!player.isSneaking()) {
+                if (!hasAccessRights(player)) {
+                    STBUtil.complain(player, "That " + getItemName() + " is private!");
+                } else {
+                    Inventory inv = isGlobal() ? EnderStorage.getEnderInventory(getLocation().getWorld(), getEnderFrequency()) : EnderStorage.getEnderInventory(player, getLocation().getWorld(), getEnderFrequency());
+                    player.openInventory(inv);
+                    player.playSound(getLocation(), Sound.BLOCK_CHEST_OPEN, 0.5F, 1.0F);
+                }
+                event.setCancelled(true);
+            }
         }
     }
 
