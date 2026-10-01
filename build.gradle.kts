@@ -1,7 +1,7 @@
 plugins {
     java
     id("com.gradleup.shadow") version "9.6.1"
-    id("io.github.intisy.github-gradle") version "1.10.3"
+    id("io.github.intisy.github-gradle") version "1.11.3"
 }
 
 group = "com.github.slimefun"
@@ -47,8 +47,8 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("org.slf4j:slf4j-simple:2.0.18")
+    testImplementation("org.mockito:mockito-core:5.24.0")
+    testImplementation("org.slf4j:slf4j-simple:2.0.20")
     testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.116.3") {
         exclude(group = "org.jetbrains", module = "annotations")
     }
