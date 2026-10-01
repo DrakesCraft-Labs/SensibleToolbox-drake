@@ -34,7 +34,7 @@
         <guava.version>33.7.1-jre</guava.version>
         <spring.version>6.2.18</spring.version>
         <commons-io.version>2.22.0</commons-io.version>
-        <jackson.version>2.22.2</jackson.version>
+        <jackson.version>2.22.3</jackson.version>
         <jackson.annotations.version>2.22</jackson.annotations.version>
         <log4j2.version>2.26.1</log4j2.version>
         <json.version>20231013</json.version>
@@ -42,9 +42,9 @@
         <maven-shade.plexus-utils.version>3.6.1</maven-shade.plexus-utils.version>
         <maven.shade.plugin.version>3.6.2</maven.shade.plugin.version>
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
-        <bstats.version>3.0.2</bstats.version>
+        <bstats.version>3.2.1</bstats.version>
         <stb.packagedJar>${project.build.directory}/${project.build.finalName}.jar</stb.packagedJar>
-        <httpcore5.version>5.4.3</httpcore5.version>
+        <httpcore5.version>5.4.4</httpcore5.version>
         <httpclient5.version>5.6.4</httpclient5.version>
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
@@ -122,7 +122,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.46</version>
+                <version>1.18.48</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
