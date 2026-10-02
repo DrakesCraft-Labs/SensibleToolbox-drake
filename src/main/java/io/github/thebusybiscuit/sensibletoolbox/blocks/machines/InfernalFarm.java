@@ -19,9 +19,6 @@ public class InfernalFarm extends AutoFarm {
 
     private static final int RADIUS = 11;
 
-    private final Set<Block> blocks = new HashSet<>();
-    private Material buffer;
-
     public InfernalFarm() {
         super();
     }
@@ -61,64 +58,35 @@ public class InfernalFarm extends AutoFarm {
         return res;
     }
 
-    private void populateBlocks(Location location) {
-        if (location == null || location.getWorld() == null) {
+    @Override
+    protected int getRadius() {
+        return RADIUS;
+    }
+
+    @Override
+    protected void harvestCrops() {
+        if (getCharge() < getScuPerCycle()) {
             return;
         }
-        int range = RADIUS / 2;
-        int bx = location.getBlockX();
-        int by = location.getBlockY();
-        int bz = location.getBlockZ();
-        for (int y = 0; y <= 2; y++) {
-            for (int x = -range; x <= range; x++) {
-                for (int z = -range; z <= range; z++) {
-                    blocks.add(location.getWorld().getBlockAt(bx + x, by + y, bz + z));
-                }
-            }
-        }
-    }
 
-    @Override
-    public void onBlockRegistered(Location location, boolean isPlacing) {
-        populateBlocks(location);
-        super.onBlockRegistered(location, isPlacing);
-    }
+        for (Block crop : blocks) {
+            if (crop.getType() == Material.NETHER_WART) {
+                Ageable ageable = (Ageable) crop.getBlockData();
 
-    @Override
-    public void onServerTick() {
-        if (blocks.isEmpty() && getLocation() != null) {
-            populateBlocks(getLocation());
-        }
+                if (ageable.getAge() >= ageable.getMaximumAge()) {
+                    setCharge(getCharge() - getScuPerCycle());
 
-        if (!isJammed()) {
-            if (getCharge() >= getScuPerCycle()) {
-                for (Block crop : blocks) {
-                    if (crop.getType() == Material.NETHER_WART) {
-                        Ageable ageable = (Ageable) crop.getBlockData();
-
-                        if (ageable.getAge() >= ageable.getMaximumAge()) {
-                            setCharge(getCharge() - getScuPerCycle());
-
-                            ageable.setAge(0);
-                            crop.setBlockData(ageable);
-                            crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getType());
-                            if (!output(Material.NETHER_WART)) {
-                                buffer = Material.NETHER_WART;
-                                setJammed(true);
-                            }
-                            break;
-                        }
+                    ageable.setAge(0);
+                    crop.setBlockData(ageable);
+                    crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getType());
+                    if (!output(Material.NETHER_WART)) {
+                        buffer = Material.NETHER_WART;
+                        setJammed(true);
                     }
+                    break;
                 }
             }
-        } else if (buffer != null) {
-            if (output(buffer)) {
-                buffer = null;
-                setJammed(false);
-            }
         }
-
-        super.onServerTick();
     }
 
     @Override

@@ -68,21 +68,36 @@ public class AutoForester extends AutoFarmingMachine {
         return res;
     }
 
-    @Override
-    public void onBlockRegistered(Location location, boolean isPlacing) {
+    private void populateBlocks(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return;
+        }
         int i = RADIUS / 2;
+        int bx = location.getBlockX();
+        int by = location.getBlockY();
+        int bz = location.getBlockZ();
 
-        for (int x = -i; x <= i; x++) {
-            for (int z = -i; z <= i; z++) {
-                blocks.add(new Location(location.getWorld(), location.getBlockX() + (double) x, location.getBlockY() + 2.0, location.getBlockZ() + (double) z).getBlock());
+        for (int y = 1; y <= 2; y++) {
+            for (int x = -i; x <= i; x++) {
+                for (int z = -i; z <= i; z++) {
+                    blocks.add(location.getWorld().getBlockAt(bx + x, by + y, bz + z));
+                }
             }
         }
+    }
 
+    @Override
+    public void onBlockRegistered(Location location, boolean isPlacing) {
+        populateBlocks(location);
         super.onBlockRegistered(location, isPlacing);
     }
 
     @Override
     public void onServerTick() {
+        if (blocks.isEmpty() && getLocation() != null) {
+            populateBlocks(getLocation());
+        }
+
         if (!isJammed()) {
             for (Block log : blocks) {
                 if (Tag.LOGS.isTagged(log.getType())) {

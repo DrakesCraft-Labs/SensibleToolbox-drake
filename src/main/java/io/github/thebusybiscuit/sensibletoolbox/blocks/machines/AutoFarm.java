@@ -35,17 +35,15 @@ public class AutoFarm extends AutoFarmingMachine {
         crops.put(Material.BEETROOTS, Material.BEETROOT);
     }
 
-    private Set<Block> blocks;
-    private Material buffer;
+    protected final Set<Block> blocks = new HashSet<>();
+    protected Material buffer;
 
     public AutoFarm() {
         super();
-        blocks = new HashSet<>();
     }
 
     public AutoFarm(ConfigurationSection conf) {
         super(conf);
-        blocks = new HashSet<>();
     }
 
     @Override
@@ -78,41 +76,75 @@ public class AutoFarm extends AutoFarmingMachine {
         return res;
     }
 
-    @Override
-    public void onBlockRegistered(Location location, boolean isPlacing) {
-        int range = RADIUS / 2;
-        Block block = location.getBlock();
+    protected int getRadius() {
+        return RADIUS;
+    }
 
-        for (int x = -range; x <= range; x++) {
-            for (int z = -range; z <= range; z++) {
-                blocks.add(block.getRelative(x, 0, z));
+    protected void populateBlocks(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return;
+        }
+        int range = getRadius() / 2;
+        int bx = location.getBlockX();
+        int by = location.getBlockY();
+        int bz = location.getBlockZ();
+
+        for (int y = 0; y <= 2; y++) {
+            for (int x = -range; x <= range; x++) {
+                for (int z = -range; z <= range; z++) {
+                    blocks.add(location.getWorld().getBlockAt(bx + x, by + y, bz + z));
+                }
             }
         }
+    }
 
+    @Override
+    public void onBlockRegistered(Location location, boolean isPlacing) {
+        populateBlocks(location);
         super.onBlockRegistered(location, isPlacing);
+    }
+
+    protected void harvestCrops() {
+        if (getCharge() < getScuPerCycle()) {
+            return;
+        }
+
+        for (Block crop : blocks) {
+            if (crops.containsKey(crop.getType())) {
+                if (crop.getBlockData() instanceof Ageable) {
+                    Ageable ageable = (Ageable) crop.getBlockData();
+
+                    if (ageable.getAge() >= ageable.getMaximumAge()) {
+                        setCharge(getCharge() - getScuPerCycle());
+
+                        ageable.setAge(0);
+                        crop.setBlockData(ageable);
+                        crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getType());
+                        Material out = crops.get(crop.getType());
+                        if (!output(out)) {
+                            buffer = out;
+                            setJammed(true);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @Override
     public void onServerTick() {
+        if (blocks.isEmpty() && getLocation() != null) {
+            populateBlocks(getLocation());
+        }
+
         if (!isJammed()) {
-            if (getCharge() >= getScuPerCycle()) {
-                for (Block crop : blocks) {
-                    if (crops.containsKey(crop.getType())) {
-                        Ageable ageable = (Ageable) crop.getBlockData();
-
-                        if (ageable.getAge() >= ageable.getMaximumAge()) {
-                            setCharge(getCharge() - getScuPerCycle());
-
-                            ageable.setAge(0);
-                            crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getType());
-                            setJammed(!output(crops.get(crop.getType())));
-                            break;
-                        }
-                    }
-                }
-            }
+            harvestCrops();
         } else if (buffer != null) {
-            setJammed(!output(buffer));
+            if (output(buffer)) {
+                buffer = null;
+                setJammed(false);
+            }
         }
 
         super.onServerTick();
