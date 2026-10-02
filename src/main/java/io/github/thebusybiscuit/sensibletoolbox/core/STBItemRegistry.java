@@ -114,7 +114,10 @@ public class STBItemRegistry implements ItemRegistry, Keyed {
             registerPermission(permissionPrefix, ItemAction.INTERACT_BLOCK, id);
 
             try {
-                LocationManager.getManager().loadDeferredBlocks(id);
+                LocationManager lm = LocationManager.getManager();
+                if (lm != null) {
+                    lm.loadDeferredBlocks(id);
+                }
             } catch (SQLException e) {
                 SensibleToolboxPlugin.getInstance().getLogger().log(Level.SEVERE, e, () -> "There was a problem restoring blocks of type '" + id + "' from persisted storage");
             }

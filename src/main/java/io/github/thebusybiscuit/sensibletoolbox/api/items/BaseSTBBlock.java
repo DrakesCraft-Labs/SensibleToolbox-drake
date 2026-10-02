@@ -179,6 +179,9 @@ public abstract class BaseSTBBlock extends BaseSTBItem {
      * @return the block's GUI (may be null)
      */
     public final InventoryGUI getGUI() {
+        if (inventoryGUI == null) {
+            inventoryGUI = createGUI();
+        }
         return inventoryGUI;
     }
 

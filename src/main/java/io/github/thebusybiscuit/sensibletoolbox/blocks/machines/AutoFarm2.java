@@ -94,29 +94,31 @@ public class AutoFarm2 extends AutoFarm {
     protected void harvestCrops() {
         for (Block crop : blocks) {
             if (crops.containsKey(crop.getType())) {
-                if (crop.getBlockData() instanceof Ageable) {
-                    Ageable ageable = (Ageable) crop.getBlockData();
+                if (crop.getType() == Material.COCOA || crop.getType() == Material.SWEET_BERRY_BUSH) {
+                    if (crop.getBlockData() instanceof Ageable) {
+                        Ageable ageable = (Ageable) crop.getBlockData();
 
-                    if (ageable.getAge() >= ageable.getMaximumAge()) {
-                        if (getCharge() >= getScuPerCycle()) {
-                            setCharge(getCharge() - getScuPerCycle());
-                        } else {
+                        if (ageable.getAge() >= ageable.getMaximumAge()) {
+                            if (getCharge() >= getScuPerCycle()) {
+                                setCharge(getCharge() - getScuPerCycle());
+                            } else {
+                                break;
+                            }
+
+                            if (crop.getType() == Material.SWEET_BERRY_BUSH) {
+                                ageable.setAge(1);
+                            } else {
+                                ageable.setAge(0);
+                            }
+                            crop.setBlockData(ageable);
+                            crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getBlockData());
+                            Material out = crops.get(crop.getType());
+                            if (!output(out)) {
+                                buffer = out;
+                                setJammed(true);
+                            }
                             break;
                         }
-
-                        if (crop.getType() == Material.SWEET_BERRY_BUSH) {
-                            ageable.setAge(1);
-                        } else {
-                            ageable.setAge(0);
-                        }
-                        crop.setBlockData(ageable);
-                        crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getType());
-                        Material out = crops.get(crop.getType());
-                        if (!output(out)) {
-                            buffer = out;
-                            setJammed(true);
-                        }
-                        break;
                     }
                 } else {
                     // Sugar Cane & Cactus
@@ -136,7 +138,7 @@ public class AutoFarm2 extends AutoFarm {
                                 break;
                             }
 
-                            highest.getWorld().playEffect(highest.getLocation(), Effect.STEP_SOUND, highest.getType());
+                            highest.getWorld().playEffect(highest.getLocation(), Effect.STEP_SOUND, highest.getBlockData());
                             Material out = crops.get(highest.getType());
                             highest.setType(Material.AIR);
                             if (!output(out)) {

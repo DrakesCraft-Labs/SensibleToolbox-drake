@@ -78,7 +78,7 @@ public class InfernalFarm extends AutoFarm {
 
                     ageable.setAge(0);
                     crop.setBlockData(ageable);
-                    crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getType());
+                    crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getBlockData());
                     if (!output(Material.NETHER_WART)) {
                         buffer = Material.NETHER_WART;
                         setJammed(true);

@@ -212,6 +212,9 @@ public abstract class CyclerGadget<T extends Enum<T>> extends ClickableGadget {
     private String getOwnerName() {
         if (stbItem instanceof BaseSTBBlock) {
             UUID id = ((BaseSTBBlock) stbItem).getOwner();
+            if (id == null) {
+                return "<nobody>";
+            }
             String name = STBUtil.getPlayerNameFromUUID(id);
             return name == null ? id.toString() : name;
         } else {

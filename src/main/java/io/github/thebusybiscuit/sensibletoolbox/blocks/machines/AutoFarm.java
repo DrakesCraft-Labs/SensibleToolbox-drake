@@ -119,7 +119,7 @@ public class AutoFarm extends AutoFarmingMachine {
 
                         ageable.setAge(0);
                         crop.setBlockData(ageable);
-                        crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getType());
+                        crop.getWorld().playEffect(crop.getLocation(), Effect.STEP_SOUND, crop.getBlockData());
                         Material out = crops.get(crop.getType());
                         if (!output(out)) {
                             buffer = out;

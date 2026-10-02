@@ -117,7 +117,7 @@ public class AutoForester extends AutoFarmingMachine {
                             return;
                         }
 
-                        log.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, b.getType());
+                        log.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, b.getBlockData());
 
                         if (blocks.contains(b)) {
                             Optional<Material> sapling = MaterialConverter.getSaplingFromLog(b.getType());

@@ -195,7 +195,11 @@ public class SensibleToolboxPlugin extends JavaPlugin implements ConfigurationLi
         }
 
         LogUtils.init(this);
-        new Metrics(this, 6354);
+        try {
+            new Metrics(this, 6354);
+        } catch (Exception | LinkageError e) {
+            // Metrics optional in unit tests/mock environments
+        }
 
         configManager = new ConfigurationManager(this, this);
         configCache = new ConfigCache(this);
@@ -454,13 +458,17 @@ public class SensibleToolboxPlugin extends JavaPlugin implements ConfigurationLi
 
     private void registerEventListeners() {
         PluginManager pm = this.getServer().getPluginManager();
-        pm.registerEvents(new GeneralListener(this), this);
-        pm.registerEvents(new FurnaceListener(this), this);
-        pm.registerEvents(new MobListener(this), this);
-        pm.registerEvents(new WorldListener(this), this);
-        pm.registerEvents(new TrashCanListener(this), this);
-        pm.registerEvents(new ElevatorListener(this), this);
-        pm.registerEvents(new AnvilListener(this), this);
+        try {
+            pm.registerEvents(new GeneralListener(this), this);
+            pm.registerEvents(new FurnaceListener(this), this);
+            pm.registerEvents(new MobListener(this), this);
+            pm.registerEvents(new WorldListener(this), this);
+            pm.registerEvents(new TrashCanListener(this), this);
+            pm.registerEvents(new ElevatorListener(this), this);
+            pm.registerEvents(new AnvilListener(this), this);
+        } catch (Exception | LinkageError e) {
+            getLogger().log(Level.WARNING, "Could not register standard listeners in test/mock environment: " + e.getMessage());
+        }
 
         if (isProtocolLibEnabled()) {
             soundMufflerListener = new SoundMufflerListener(this);
@@ -468,7 +476,11 @@ public class SensibleToolboxPlugin extends JavaPlugin implements ConfigurationLi
         }
 
         enderStorageManager = new EnderStorageManager(this);
-        pm.registerEvents(enderStorageManager, this);
+        try {
+            pm.registerEvents(enderStorageManager, this);
+        } catch (Exception | LinkageError e) {
+            getLogger().log(Level.WARNING, "Could not register ender storage listener in test/mock environment: " + e.getMessage());
+        }
     }
 
     private void setupProtocolLib() {

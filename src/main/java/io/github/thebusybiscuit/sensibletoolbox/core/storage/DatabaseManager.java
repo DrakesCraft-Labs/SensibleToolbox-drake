@@ -45,7 +45,11 @@ class DatabaseManager {
     @Nonnull
     private Connection connectToSQLite() throws SQLException {
         logger.info("Connecting to local database...");
-        File file = new File(SensibleToolboxPlugin.getInstance().getDataFolder(), "blocks.db");
+        File folder = SensibleToolboxPlugin.getInstance().getDataFolder();
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        File file = new File(folder, "blocks.db");
 
         try {
             // Class.forName(...) is no longer required as of JDBC 4.0+
