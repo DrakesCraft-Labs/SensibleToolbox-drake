@@ -66,6 +66,9 @@ permissions:
    stb.commands.getcfg:
       description: Allows STB items & blocks to be obtained with /stb give
       default: op
+   stb.commands.guide:
+      description: Allows the bilingual (English/Spanish) in-game guide to be read with /stb guide
+      default: true
    stb.commands.recipe:
       description: Allows recipes to be searched for by name with /stb recipe
       default: true

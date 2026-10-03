@@ -68,6 +68,7 @@ import io.github.thebusybiscuit.sensibletoolbox.commands.ExamineCommand;
 import io.github.thebusybiscuit.sensibletoolbox.commands.FriendCommand;
 import io.github.thebusybiscuit.sensibletoolbox.commands.GetcfgCommand;
 import io.github.thebusybiscuit.sensibletoolbox.commands.GiveCommand;
+import io.github.thebusybiscuit.sensibletoolbox.commands.GuideCommand;
 import io.github.thebusybiscuit.sensibletoolbox.commands.RecipeCommand;
 import io.github.thebusybiscuit.sensibletoolbox.commands.RedrawCommand;
 import io.github.thebusybiscuit.sensibletoolbox.commands.RemoveFrameCommand;
@@ -157,6 +158,7 @@ import io.github.thebusybiscuit.sensibletoolbox.utils.STBUtil;
 import me.desht.dhutils.DHUtilsException;
 import me.desht.dhutils.Debugger;
 import me.desht.dhutils.MiscUtil;
+import me.desht.dhutils.commands.AbstractCommand;
 import me.desht.dhutils.commands.CommandManager;
 import me.desht.dhutils.configuration.ConfigurationListener;
 import me.desht.dhutils.configuration.ConfigurationManager;
@@ -275,30 +277,29 @@ public class SensibleToolboxPlugin extends JavaPlugin implements ConfigurationLi
      * @return Whether the {@link MinecraftVersion} is unsupported
      */
     private boolean isVersionUnsupported() {
-        int majorVersion = getMinecraftMajorVersion();
+        String bukkitVersion = getServer().getBukkitVersion();
+        MinecraftVersion detected = MinecraftVersion.fromBukkitVersion(bukkitVersion);
 
-        if (majorVersion > 0) {
-            for (MinecraftVersion supportedVersion : MinecraftVersion.values()) {
-                if (supportedVersion.isMinecraftVersion(majorVersion)) {
-                    minecraftVersion = supportedVersion;
-                    return false;
-                }
-            }
-
-            // Looks like you are using an unsupported Minecraft Version
-            getLogger().log(Level.SEVERE, "#############################################");
-            getLogger().log(Level.SEVERE, "### SensibleToolbox was not installed correctly!");
-            getLogger().log(Level.SEVERE, "### You are using the wrong version of Minecraft!");
-            getLogger().log(Level.SEVERE, "###");
-            getLogger().log(Level.SEVERE, "### You are using Minecraft v1.{0}", majorVersion);
-            getLogger().log(Level.SEVERE, "### but SensibleToolbox v{0} requires you to be using", getDescription().getVersion());
-            getLogger().log(Level.SEVERE, "### Minecraft {0}", String.join(" / ", getSupportedVersions()));
-            getLogger().log(Level.SEVERE, "#############################################");
-            return true;
+        if (detected == MinecraftVersion.UNKNOWN) {
+            getLogger().log(Level.WARNING, "We could not determine the version of Minecraft you were using ({0})", bukkitVersion);
+            return false;
         }
 
-        getLogger().log(Level.WARNING, "We could not determine the version of Minecraft you were using (1.{0})", majorVersion);
-        return false;
+        if (detected != null) {
+            minecraftVersion = detected;
+            return false;
+        }
+
+        // Looks like you are using an unsupported Minecraft Version
+        getLogger().log(Level.SEVERE, "#############################################");
+        getLogger().log(Level.SEVERE, "### SensibleToolbox was not installed correctly!");
+        getLogger().log(Level.SEVERE, "### You are using the wrong version of Minecraft!");
+        getLogger().log(Level.SEVERE, "###");
+        getLogger().log(Level.SEVERE, "### You are using Minecraft {0}", bukkitVersion);
+        getLogger().log(Level.SEVERE, "### but SensibleToolbox v{0} requires you to be using", getDescription().getVersion());
+        getLogger().log(Level.SEVERE, "### Minecraft {0}", String.join(" / ", getSupportedVersions()));
+        getLogger().log(Level.SEVERE, "#############################################");
+        return true;
     }
 
     private @Nonnull Collection<String> getSupportedVersions() {
@@ -311,15 +312,6 @@ public class SensibleToolboxPlugin extends JavaPlugin implements ConfigurationLi
         }
 
         return list;
-    }
-
-    private int getMinecraftMajorVersion() {
-        String version = getServer().getBukkitVersion();
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("1\\.(\\d+)").matcher(version);
-        if (matcher.find()) {
-            return Integer.parseInt(matcher.group(1));
-        }
-        return 0;
     }
 
     @Override
@@ -514,21 +506,37 @@ public class SensibleToolboxPlugin extends JavaPlugin implements ConfigurationLi
     }
 
     private void registerCommands() {
-        commandManager.registerCommand(new SaveCommand());
-        commandManager.registerCommand(new RemoveFrameCommand());
-        commandManager.registerCommand(new GiveCommand());
-        commandManager.registerCommand(new ShowCommand());
-        commandManager.registerCommand(new ChargeCommand());
-        commandManager.registerCommand(new GetcfgCommand());
-        commandManager.registerCommand(new SetcfgCommand());
-        commandManager.registerCommand(new DebugCommand());
-        commandManager.registerCommand(new SoundCommand());
-        commandManager.registerCommand(new RecipeCommand());
-        commandManager.registerCommand(new ExamineCommand());
-        commandManager.registerCommand(new RedrawCommand());
-        commandManager.registerCommand(new FriendCommand());
-        commandManager.registerCommand(new UnfriendCommand());
-        commandManager.registerCommand(new ValidateCommand());
+        for (AbstractCommand command : createCommands()) {
+            commandManager.registerCommand(command);
+        }
+    }
+
+    /**
+     * Creates every /stb subcommand. Exposed so tests can verify that the in-game guide
+     * documents each registered command.
+     *
+     * @return A new instance of every subcommand
+     */
+    @Nonnull
+    public static List<AbstractCommand> createCommands() {
+        return List.of(
+            new SaveCommand(),
+            new RemoveFrameCommand(),
+            new GiveCommand(),
+            new ShowCommand(),
+            new ChargeCommand(),
+            new GetcfgCommand(),
+            new SetcfgCommand(),
+            new DebugCommand(),
+            new SoundCommand(),
+            new RecipeCommand(),
+            new ExamineCommand(),
+            new RedrawCommand(),
+            new FriendCommand(),
+            new UnfriendCommand(),
+            new ValidateCommand(),
+            new GuideCommand()
+        );
     }
 
     /**

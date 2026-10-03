@@ -23,9 +23,14 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build with Maven
+      # Los tests unitarios y de integracion (incluida la compatibilidad binaria con
+      # Paper 26.1 / 26.2) deben pasar antes de publicar el jar.
+      - name: Test and build with Maven
         if: ${{ hashFiles('pom.xml') != '' }}
-        run: mvn -B -ntp -DskipTests clean package
+        run: |
+          mvn -B -ntp clean verify
+          # Las APIs copiadas para el test de compatibilidad no son artefactos de release.
+          rm -rf target/compat-api
 
       - name: Build with Gradle
         if: ${{ hashFiles('gradlew') != '' && hashFiles('pom.xml') == '' }}

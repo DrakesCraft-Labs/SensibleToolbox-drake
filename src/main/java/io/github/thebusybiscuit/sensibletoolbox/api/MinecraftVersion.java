@@ -1,6 +1,10 @@
 package io.github.thebusybiscuit.sensibletoolbox.api;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Server;
@@ -69,6 +73,17 @@ public enum MinecraftVersion {
     MINECRAFT_1_21(21, "1.21.x"),
 
     /**
+     * This constant represents Minecraft (Java Edition) Version 26.1, the first
+     * release using the year-based version scheme.
+     */
+    MINECRAFT_26_1(26, 1, "26.1.x"),
+
+    /**
+     * This constant represents Minecraft (Java Edition) Version 26.2
+     */
+    MINECRAFT_26_2(26, 2, "26.2.x"),
+
+    /**
      * This constant represents an exceptional state in which we were unable
      * to identify the Minecraft Version we are using
      */
@@ -80,8 +95,15 @@ public enum MinecraftVersion {
      */
     UNIT_TEST("Unit Test Environment", true);
 
+    /**
+     * Matches the leading "release.minor" pair of a Bukkit version string, e.g.
+     * {@literal "1.21.11-R0.1-SNAPSHOT"} or {@literal "26.1.2.build.74-stable"}.
+     */
+    private static final Pattern VERSION_PATTERN = Pattern.compile("^\\s*(\\d+)\\.(\\d+)");
+
     private final String name;
     private final boolean virtual;
+    private final int release;
     private final int majorVersion;
 
     /**
@@ -95,7 +117,24 @@ public enum MinecraftVersion {
      *            The display name of this {@link MinecraftVersion}
      */
     MinecraftVersion(int majorVersion, @Nonnull String name) {
+        this(1, majorVersion, name);
+    }
+
+    /**
+     * This constructs a new {@link MinecraftVersion} for a given release line.
+     * Legacy versions use release {@literal 1} ("1.21"), year-based versions use the
+     * year as release ("26.1").
+     *
+     * @param release
+     *            The leading version number (1 for legacy, 26+ for year-based versions)
+     * @param majorVersion
+     *            The second version number
+     * @param name
+     *            The display name of this {@link MinecraftVersion}
+     */
+    MinecraftVersion(int release, int majorVersion, @Nonnull String name) {
         this.name = name;
+        this.release = release;
         this.majorVersion = majorVersion;
         this.virtual = false;
     }
@@ -112,6 +151,7 @@ public enum MinecraftVersion {
      */
     MinecraftVersion(@Nonnull String name, boolean virtual) {
         this.name = name;
+        this.release = 0;
         this.majorVersion = 0;
         this.virtual = virtual;
     }
@@ -153,7 +193,63 @@ public enum MinecraftVersion {
      * @return Whether this {@link MinecraftVersion} matches the specified version id
      */
     public boolean isMinecraftVersion(int minecraftVersion) {
-        return !isVirtual() && this.majorVersion == minecraftVersion;
+        return isMinecraftVersion(1, minecraftVersion);
+    }
+
+    /**
+     * This tests if the given release and version numbers match this {@link MinecraftVersion}.
+     * <p>
+     * Example: {@literal "1.21.11"} is release {@literal 1}, version {@literal 21} and
+     * {@literal "26.1.2"} is release {@literal 26}, version {@literal 1}.
+     *
+     * @param release
+     *            The leading version number
+     * @param minecraftVersion
+     *            The second version number
+     *
+     * @return Whether this {@link MinecraftVersion} matches the specified version
+     */
+    public boolean isMinecraftVersion(int release, int minecraftVersion) {
+        return !isVirtual() && this.release == release && this.majorVersion == minecraftVersion;
+    }
+
+    /**
+     * This resolves the {@link MinecraftVersion} of a Bukkit version string such as
+     * {@literal "1.21.11-R0.1-SNAPSHOT"} or {@literal "26.2.build.129-stable"}.
+     *
+     * @param bukkitVersion
+     *            The value of {@link Server#getBukkitVersion()}
+     *
+     * @return The matching supported version, {@link #UNKNOWN} if the string could not be
+     *         parsed, or {@literal null} if it was parsed but is not supported
+     */
+    @Nullable
+    public static MinecraftVersion fromBukkitVersion(@Nullable String bukkitVersion) {
+        if (bukkitVersion == null) {
+            return UNKNOWN;
+        }
+
+        Matcher matcher = VERSION_PATTERN.matcher(bukkitVersion);
+        if (!matcher.find()) {
+            return UNKNOWN;
+        }
+
+        int release;
+        int version;
+        try {
+            release = Integer.parseInt(matcher.group(1));
+            version = Integer.parseInt(matcher.group(2));
+        } catch (NumberFormatException x) {
+            return UNKNOWN;
+        }
+
+        for (MinecraftVersion supported : values()) {
+            if (supported.isMinecraftVersion(release, version)) {
+                return supported;
+            }
+        }
+
+        return null;
     }
 
     /**

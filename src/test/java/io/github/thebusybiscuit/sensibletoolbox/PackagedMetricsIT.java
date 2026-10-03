@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
 
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.MockBukkit;
@@ -81,7 +82,7 @@ class PackagedMetricsIT {
             Files.writeString(config, "enabled: false\nserverUuid: 00000000-0000-0000-0000-000000000001\n");
 
             Class<?> metrics = loader.loadClass(METRICS.replace('/', '.'));
-            Object instance = metrics.getConstructor(JavaPlugin.class, int.class).newInstance(plugin, 6354);
+            Object instance = metrics.getConstructor(Plugin.class, int.class).newInstance(plugin, 6354);
             metrics.getMethod("shutdown").invoke(instance);
         } finally {
             MockBukkit.unmock();
