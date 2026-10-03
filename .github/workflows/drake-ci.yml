@@ -1,37 +1,154 @@
 name: Drake CI
 
+# Valida cada cambio contra las tres versiones soportadas:
+#   - Paper 1.21.11 (Java 21): compila el jar que se publica y ejecuta tests unitarios +
+#     tests de integracion sobre el jar empaquetado (descriptor, bStats y compatibilidad
+#     binaria contra las APIs 1.21.11 / 26.1 / 26.2).
+#   - Paper 26.1.x y 26.2.x (Java 25): recompila contra esas APIs y ejecuta la misma suite
+#     con MockBukkit de esa version.
+# Ningun jar se empaqueta sin pasar antes por los tests (mvn verify, sin -DskipTests).
+
 on:
   pull_request:
-    branches: ["1.21-latin"]
+    branches: ["main", "1.21-latin"]
   push:
-    branches: ["1.21-latin"]
+    branches: ["main", "1.21-latin"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: drake-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  static-checks:
+    name: Validacion estatica
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up Java 21
+      - name: Verificar metadatos de version y soporte 26.x
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::$1"; exit 1; }
+
+          grep -q '<version>1.21-Drake-SNAPSHOT</version>' pom.xml && fail 'La version del pom no fue incrementada.'
+          grep -Fq '<id>mc-26.1</id>' pom.xml || fail 'Falta el perfil Maven mc-26.1.'
+          grep -Fq '<id>mc-26.2</id>' pom.xml || fail 'Falta el perfil Maven mc-26.2.'
+          grep -Fq '<maven.compiler.release>${java.version}</maven.compiler.release>' pom.xml || fail 'El jar debe compilarse con release = java.version.'
+          grep -Fq '<java.version>21</java.version>' pom.xml || fail 'El jar debe ser Java 21 para cargar en 1.21.11.'
+
+          version_enum=src/main/java/io/github/thebusybiscuit/sensibletoolbox/api/MinecraftVersion.java
+          grep -Fq 'MINECRAFT_26_1(26, 1' "$version_enum" || fail 'MinecraftVersion no declara 26.1.'
+          grep -Fq 'MINECRAFT_26_2(26, 2' "$version_enum" || fail 'MinecraftVersion no declara 26.2.'
+
+          if grep -RnF '1\\.(\\d+)' src/main/java; then
+            fail 'Se reintrodujo la deteccion de version "1.(x)" que rompe en 26.x.'
+          fi
+
+          grep -Fq 'stb.commands.guide:' src/main/resources/plugin.yml || fail 'Falta el permiso stb.commands.guide en plugin.yml.'
+          test -f src/main/resources/guide_en.yml || fail 'Falta guide_en.yml.'
+          test -f src/main/resources/guide_es.yml || fail 'Falta guide_es.yml.'
+          echo 'Metadatos OK.'
+
+      - name: Instalar PyYAML
+        run: python3 -m pip install --quiet pyyaml
+
+      - name: Verificar paridad de la guia (en/es)
+        shell: python
+        run: |
+          import sys, yaml
+          en = yaml.safe_load(open('src/main/resources/guide_en.yml', encoding='utf-8'))
+          es = yaml.safe_load(open('src/main/resources/guide_es.yml', encoding='utf-8'))
+          errors = []
+          if list(en['topics']) != list(es['topics']):
+              errors.append(f"Temas distintos: en={list(en['topics'])} es={list(es['topics'])}")
+          if set(en['ui']) != set(es['ui']):
+              errors.append(f"Claves ui distintas: {set(en['ui']) ^ set(es['ui'])}")
+          for doc, name in ((en, 'en'), (es, 'es')):
+              for tid, topic in doc['topics'].items():
+                  if not topic.get('lines'):
+                      errors.append(f"{name}:{tid} no tiene contenido")
+          for e in errors:
+              print(f"::error::{e}")
+          sys.exit(1 if errors else 0)
+
+  build:
+    name: Tests ${{ matrix.target }}
+    needs: static-checks
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: 'Paper 1.21.11'
+            java: '21'
+            profile: ''
+            publish-jar: true
+          - target: 'Paper 26.1.x'
+            java: '25'
+            profile: '-P mc-26.1'
+            publish-jar: false
+          - target: 'Paper 26.2.x'
+            java: '25'
+            profile: '-P mc-26.2'
+            publish-jar: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Java ${{ matrix.java }}
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: ${{ matrix.java }}
+          cache: maven
 
-      - name: Build with Maven (standalone-safe)
-        if: ${{ hashFiles('pom.xml') != '' }}
+      - name: Tests unitarios, empaquetado y tests de integracion
+        run: mvn -B -ntp clean verify ${{ matrix.profile }}
+
+      - name: Resumen de tests
+        if: always()
         shell: bash
         run: |
-          if grep -q '<artifactId>drakes-slimefun-labs</artifactId>' pom.xml; then
-            echo '::notice title=CI fallback::Parent drakes-slimefun-labs detectado; se omite build Maven completo en repos standalone.'
-            exit 0
-          fi
-          mvn -B -ntp -DskipTests clean package
+          total=0; failed=0; errors=0; skipped=0
+          for f in target/surefire-reports/TEST-*.xml target/failsafe-reports/TEST-*.xml; do
+            [ -f "$f" ] || continue
+            line="$(grep -m1 '<testsuite' "$f")"
+            t=$(sed -n 's/.* tests="\([0-9]*\)".*/\1/p' <<<"$line")
+            fl=$(sed -n 's/.* failures="\([0-9]*\)".*/\1/p' <<<"$line")
+            er=$(sed -n 's/.* errors="\([0-9]*\)".*/\1/p' <<<"$line")
+            sk=$(sed -n 's/.* skipped="\([0-9]*\)".*/\1/p' <<<"$line")
+            total=$((total + ${t:-0})); failed=$((failed + ${fl:-0})); errors=$((errors + ${er:-0})); skipped=$((skipped + ${sk:-0}))
+          done
+          {
+            echo "### ${{ matrix.target }} (Java ${{ matrix.java }})"
+            echo "| Tests | Fallos | Errores | Omitidos |"
+            echo "|---|---|---|---|"
+            echo "| $total | $failed | $errors | $skipped |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Build with Gradle (standalone-safe)
-        if: ${{ hashFiles('gradlew') != '' && hashFiles('pom.xml') == '' }}
-        shell: bash
-        run: |
-          echo '::notice title=CI fallback::Repo Gradle standalone detectado; se valida workflow sin build pesado en PR.'
-          exit 0
+      - name: Subir reportes de tests
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-${{ matrix.java }}-${{ strategy.job-index }}
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+          retention-days: 14
+
+      - name: Subir jar validado
+        if: matrix.publish-jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: SensibleToolbox-drake-jar
+          path: |
+            target/*.jar
+            !target/original-*.jar
+          if-no-files-found: error
+          retention-days: 30

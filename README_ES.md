@@ -9,8 +9,8 @@
 <p>
   <a href="https://github.com/DrakesCraft-Labs/SensibleToolbox-drake"><img src="https://img.shields.io/badge/GitHub-SensibleToolbox--Drake-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
   <img src="https://img.shields.io/badge/Slimefun4-Drake_Edition-22C55E?style=for-the-badge&logo=curseforge&logoColor=white" alt="Slimefun4"/>
-  <img src="https://img.shields.io/badge/Paper-1.21.11-38BDF8?style=for-the-badge&logo=minecraft&logoColor=white" alt="Paper 1.21.11"/>
-  <img src="https://img.shields.io/badge/Java-21-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21"/>
+  <img src="https://img.shields.io/badge/Paper-1.21.11%20%7C%2026.1%20%7C%2026.2-38BDF8?style=for-the-badge&logo=minecraft&logoColor=white" alt="Paper 1.21.11 | 26.1 | 26.2"/>
+  <img src="https://img.shields.io/badge/Java-21%20%7C%2025-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21 | 25"/>
 </p>
 
 </div>
@@ -78,14 +78,21 @@ Todo el contenido se investiga y fabrica directamente desde la **Guía de Slimef
 * **`/stb unfriend <jugador>`**: Retira un perfil registrado de tu red de confianza.
 * Los nombres inexistentes o UUID no registrados se rechazan con un mensaje claro, sin crear perfiles artificiales ni generar excepciones en consola.
 
+### 📘 8. Guía interna (español / inglés)
+* **`/stb guide`**: Índice clicable con todos los temas: primeros pasos, energía SCU, generadores, máquinas, mejoras, agricultura, Item Router, almacenamiento, almacenamiento Ender, herramientas, redstone, componentes, acceso y amigos, comandos, administración y compatibilidad.
+* **`/stb guide <tema> [página]`**: Lee un tema con navegación de páginas clicable.
+* **`/stb guide search <palabra>`**: Busca los temas que mencionan una palabra.
+* El idioma sigue el idioma del cliente del jugador (`es_*` → español, cualquier otro → inglés). Añade `es` o `en` a cualquier comando para forzarlo, o pulsa el botón de idioma.
+* Permiso `stb.commands.guide` (concedido a todos por defecto).
+
 ---
 
 ## 📋 Compatibilidad Técnica
 
 | Parámetro | Requisito |
 |---|---|
-| **Servidor** | Paper / Purpur / Folia **1.21.11** |
-| **Java** | **Java 21** LTS |
+| **Servidor** | Paper / Purpur **1.21.11**, **26.1.x** y **26.2.x** (un solo jar para las tres) |
+| **Java** | **Java 21+** en 1.21.11 · **Java 25** en 26.1 / 26.2 |
 | **Core Requerido** | [Slimefun4-Drake](https://github.com/DrakesCraft-Labs/Slimefun4-Drake) |
 | **Arquitectura** | 100% Server-side (no requiere mods ni clientes modificados en los jugadores) |
 
@@ -99,7 +106,23 @@ Todo el contenido se investiga y fabrica directamente desde la **Guía de Slimef
 
 ## ✅ Verificación
 
-El reactor Maven ejecuta las pruebas JUnit 5 con `mvn clean test`. La suite cubre la carga base y la resolución segura de perfiles usada por los comandos de amistad.
+`mvn clean verify` (JDK 21+) ejecuta los tests unitarios, empaqueta el jar y después corre los tests de integración sobre el jar final:
+
+* **PackagedPluginDescriptorIT**: versión y api-version de plugin.yml, archivos de la guía y bytecode Java 21.
+* **PaperApiCompatibilityIT**: enlaza cada referencia Bukkit/Paper del jar contra las APIs de Paper **1.21.11**, **26.1** y **26.2**; un método eliminado o una clase convertida en interfaz rompe el build en lugar del servidor.
+* **PackagedMetricsIT**: bStats relocalizado funciona desde el jar final.
+
+Para compilar y ejecutar toda la suite contra las APIs nuevas (requiere **JDK 25**):
+
+```bash
+mvn clean verify -P mc-26.1
+```
+
+```bash
+mvn clean verify -P mc-26.2
+```
+
+GitHub Actions (`Drake CI`) ejecuta las tres variantes en cada push y pull request.
 
 ---
 

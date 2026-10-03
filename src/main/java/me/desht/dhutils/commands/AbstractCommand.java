@@ -144,6 +144,22 @@ public abstract class AbstractCommand implements Comparable<AbstractCommand> {
         return cmdRecs;
     }
 
+    /**
+     * Returns every label this command answers to, e.g. {@literal "stb guide"}.
+     *
+     * @return The full labels of this command
+     */
+    @Nonnull
+    public List<String> getLabels() {
+        List<String> labels = new ArrayList<>(cmdRecs.size());
+
+        for (CommandRecord rec : cmdRecs) {
+            labels.add(rec.toString().trim());
+        }
+
+        return labels;
+    }
+
     @Nonnull
     protected List<String> noCompletions(CommandSender sender) {
         return CommandManager.noCompletions(sender);

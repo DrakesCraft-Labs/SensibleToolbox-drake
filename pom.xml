@@ -6,11 +6,11 @@
 
     <groupId>com.github.drakescraft_labs</groupId>
     <artifactId>SensibleToolbox-drake</artifactId>
-    <version>1.21-Drake-SNAPSHOT</version>
+    <version>1.22-Drake-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>SensibleToolbox-drake</name>
-    <description>SensibleToolbox port integrado en stack Drake.</description>
+    <description>SensibleToolbox port integrado en stack Drake. Soporta Paper/Purpur 1.21.11, 26.1.x y 26.2.x con un solo jar.</description>
 
     <properties>
 
@@ -20,7 +20,23 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
+        <!--
+          API contra la que se compila. El jar resultante es Java 21 (release 21) y corre en
+          1.21.11 (Java 21) y en 26.1.x / 26.2.x (Java 25). Los perfiles mc-26.1 y mc-26.2
+          recompilan y ejecutan los tests contra esas APIs (requieren JDK 25).
+        -->
         <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
+        <!-- APIs contra las que PaperApiCompatibilityIT valida el jar empaquetado. -->
+        <paper.compat.1_21.version>1.21.11-R0.1-SNAPSHOT</paper.compat.1_21.version>
+        <paper.compat.26_1.version>26.1.2.build.74-stable</paper.compat.26_1.version>
+        <paper.compat.26_2.version>26.2.build.129-stable</paper.compat.26_2.version>
+        <mockbukkit.artifactId>mockbukkit-v1.21</mockbukkit.artifactId>
+        <mockbukkit.version>4.116.3</mockbukkit.version>
+        <stb.requiredJdk>[21,)</stb.requiredJdk>
+        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
+        <maven.enforcer.plugin.version>3.6.3</maven.enforcer.plugin.version>
+        <maven.dependency.plugin.version>3.11.0</maven.dependency.plugin.version>
+        <asm.version>9.10.1</asm.version>
         <slimefun.version>RC-37</slimefun.version>
         <slimefun.drake.version>11.0-Drake-1.21.11-SNAPSHOT</slimefun.drake.version>
         <dough.version>1.3.1-DRAKE-v11-SNAPSHOT</dough.version>
@@ -327,14 +343,14 @@
         </dependency>
         <dependency>
             <groupId>org.mockbukkit.mockbukkit</groupId>
-            <artifactId>mockbukkit-v1.21</artifactId>
-            <version>4.116.3</version>
+            <artifactId>${mockbukkit.artifactId}</artifactId>
+            <version>${mockbukkit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>9.8</version>
+            <version>${asm.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -411,6 +427,77 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven.enforcer.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-build-environment</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>${stb.requiredJdk}</version>
+                                    <message>Este build necesita JDK ${stb.requiredJdk}. Los perfiles mc-26.1 / mc-26.2 compilan contra APIs Java 25.</message>
+                                </requireJavaVersion>
+                                <requireMavenVersion>
+                                    <version>[3.6.3,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven.dependency.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <!-- APIs de destino para PaperApiCompatibilityIT (solo se leen como bytes). -->
+                        <id>copy-compat-apis</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/compat-api</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>io.papermc.paper</groupId>
+                                    <artifactId>paper-api</artifactId>
+                                    <version>${paper.compat.1_21.version}</version>
+                                    <destFileName>paper-api-1.21.11.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.papermc.paper</groupId>
+                                    <artifactId>paper-api</artifactId>
+                                    <version>${paper.compat.26_1.version}</version>
+                                    <destFileName>paper-api-26.1.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.papermc.paper</groupId>
+                                    <artifactId>paper-api</artifactId>
+                                    <version>${paper.compat.26_2.version}</version>
+                                    <destFileName>paper-api-26.2.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.plugin.version}</version>
             </plugin>
@@ -422,6 +509,8 @@
                     <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                     <systemPropertyVariables>
                         <stb.packagedJar>${stb.packagedJar}</stb.packagedJar>
+                        <stb.projectVersion>${project.version}</stb.projectVersion>
+                        <stb.compatApiDir>${project.build.directory}/compat-api</stb.compatApiDir>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
@@ -464,4 +553,27 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- mvn -P mc-26.1 verify  (JDK 25): compila y ejecuta los tests contra Paper 26.1.x -->
+        <profile>
+            <id>mc-26.1</id>
+            <properties>
+                <paper.version>${paper.compat.26_1.version}</paper.version>
+                <mockbukkit.artifactId>mockbukkit-v26.1.2</mockbukkit.artifactId>
+                <mockbukkit.version>4.115.0</mockbukkit.version>
+                <stb.requiredJdk>[25,)</stb.requiredJdk>
+            </properties>
+        </profile>
+        <!-- mvn -P mc-26.2 verify  (JDK 25): compila y ejecuta los tests contra Paper 26.2.x -->
+        <profile>
+            <id>mc-26.2</id>
+            <properties>
+                <paper.version>${paper.compat.26_2.version}</paper.version>
+                <mockbukkit.artifactId>mockbukkit-v26.2</mockbukkit.artifactId>
+                <mockbukkit.version>4.116.1</mockbukkit.version>
+                <stb.requiredJdk>[25,)</stb.requiredJdk>
+            </properties>
+        </profile>
+    </profiles>
 </project>

@@ -120,8 +120,9 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Compilar
-        run: mvn -B -ntp package -DskipTests
+      # verify ejecuta los tests unitarios y de integracion antes de dar el jar por bueno.
+      - name: Tests y compilacion
+        run: mvn -B -ntp clean verify
 
       - name: Localizar el jar
         id: jar
@@ -189,6 +190,10 @@ jobs:
             spigot
           game-versions: |
             1.21.x
+            26.1
+            26.1.1
+            26.1.2
+            26.2
           changelog: ${{ needs.decidir.outputs.motivo }}
           # No fallar si algun campo opcional falta.
           modrinth-featured: false

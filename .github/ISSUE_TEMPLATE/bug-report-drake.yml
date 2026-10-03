@@ -7,14 +7,14 @@ body:
     id: mc
     attributes:
       label: Versión de Minecraft/Paper
-      placeholder: "Ej: Purpur 1.21.1"
+      placeholder: "Ej: Purpur 26.2 / Paper 1.21.11"
     validations:
       required: true
   - type: input
     id: addon
     attributes:
       label: Versión del addon
-      placeholder: "Ej: 1.21-Drake-SNAPSHOT"
+      placeholder: "Ej: 1.22-Drake-SNAPSHOT"
     validations:
       required: true
   - type: textarea

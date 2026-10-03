@@ -9,8 +9,8 @@
 <p>
   <a href="https://github.com/DrakesCraft-Labs/SensibleToolbox-drake"><img src="https://img.shields.io/badge/GitHub-SensibleToolbox--Drake-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
   <img src="https://img.shields.io/badge/Slimefun4-Drake_Edition-22C55E?style=for-the-badge&logo=curseforge&logoColor=white" alt="Slimefun4"/>
-  <img src="https://img.shields.io/badge/Paper-1.21.11-38BDF8?style=for-the-badge&logo=minecraft&logoColor=white" alt="Paper 1.21.11"/>
-  <img src="https://img.shields.io/badge/Java-21-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21"/>
+  <img src="https://img.shields.io/badge/Paper-1.21.11%20%7C%2026.1%20%7C%2026.2-38BDF8?style=for-the-badge&logo=minecraft&logoColor=white" alt="Paper 1.21.11 | 26.1 | 26.2"/>
+  <img src="https://img.shields.io/badge/Java-21%20%7C%2025-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21 | 25"/>
 </p>
 
 [🇬🇧 **English**](README.md) · [🇪🇸 **Español**](README_ES.md)
@@ -78,14 +78,21 @@ All items, machines, and tools are researched and crafted directly through the *
 * **`/stb unfriend <player>`**: Revokes trust permissions.
 * Fully validated with offline UUID resolution; invalid player names are rejected gracefully without causing server-side exceptions.
 
+### 📘 8. In-Game Guide (English / Spanish)
+* **`/stb guide`**: Clickable index of every topic: getting started, SCU energy, generators, machines, upgrades, farming, Item Router, storage, ender storage, tools, redstone, components, access & friends, commands, administration and compatibility.
+* **`/stb guide <topic> [page]`**: Read a topic with clickable page navigation.
+* **`/stb guide search <word>`**: Find every topic that mentions a word.
+* The language follows the player's client locale (`es_*` → Spanish, anything else → English). Add `en` or `es` to any command to force it, or click the language button.
+* Permission `stb.commands.guide` (granted to everyone by default).
+
 ---
 
 ## 📋 Technical Compatibility
 
 | Parameter | Requirement |
 |---|---|
-| **Server Software** | Paper / Purpur / Folia **1.21.11** |
-| **Java Runtime** | **Java 21** LTS |
+| **Server Software** | Paper / Purpur **1.21.11**, **26.1.x** and **26.2.x** (one jar for all three) |
+| **Java Runtime** | **Java 21+** on 1.21.11 · **Java 25** on 26.1 / 26.2 |
 | **Required Core** | [Slimefun4-Drake](https://github.com/DrakesCraft-Labs/Slimefun4-Drake) |
 | **Architecture** | 100% Server-Side (Vanilla Minecraft clients can join without installing client mods) |
 
@@ -104,8 +111,26 @@ All items, machines, and tools are researched and crafted directly through the *
 ```bash
 git clone https://github.com/DrakesCraft-Labs/SensibleToolbox-drake.git
 cd SensibleToolbox-drake
-mvn clean package
+mvn clean verify
 ```
+
+`mvn clean verify` (JDK 21+) runs the unit tests, packages the jar and then runs the integration tests on the packaged jar:
+
+* **PackagedPluginDescriptorIT**: plugin.yml version/api-version, guide files and Java 21 bytecode.
+* **PaperApiCompatibilityIT**: links every Bukkit/Paper reference of the jar against the Paper **1.21.11**, **26.1** and **26.2** APIs, so a removed method or a class that became an interface fails the build instead of a live server.
+* **PackagedMetricsIT**: relocated bStats works from the final jar.
+
+To compile and run the whole suite against the newer APIs (requires **JDK 25**):
+
+```bash
+mvn clean verify -P mc-26.1
+```
+
+```bash
+mvn clean verify -P mc-26.2
+```
+
+GitHub Actions (`Drake CI`) runs all three on every push and pull request.
 
 The compiled artifact will be located under `target/SensibleToolbox-drake.jar`.
 
