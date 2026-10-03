@@ -22,7 +22,7 @@ import org.mockbukkit.mockbukkit.ServerMock;
 
 import io.github.thebusybiscuit.sensibletoolbox.api.filters.FilterType;
 import io.github.thebusybiscuit.sensibletoolbox.core.STBItemRegistry;
-import com.github.drakescraft_labs.slimefun4.libraries.dough.data.persistent.PersistentDataAPI;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.data.persistent.PersistentDataAPI;
 
 class RouterFilterNBTSafetyTest {
 
